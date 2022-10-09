@@ -1,12 +1,12 @@
 # Modified from https://github.com/mschubert/clustermq/blob/master/inst/SLURM.tmpl
 # under the Apache 2.0 license.
 #!/bin/sh
-#SBATCH --job-name=brazen_barnacle_{{ job_name }}
+#SBATCH --job-name=SCISSORS_Sims
 #SBATCH --output={{ log_file | /dev/null }}
 #SBATCH --error={{ log_file | /dev/null }}
-#SBATCH --mem-per-cpu={{ memory | 4096 }}
+#SBATCH --mem-per-cpu=50G
 #SBATCH --array=1-{{ n_jobs }}
-#SBATCH --cpus-per-task={{ cores | 1 }}
+#SBATCH --cpus-per-task=1
 
 module load R # Comment out if R is not an environment module.
 # ulimit -v $(( 1024 * {{ memory | 4096 }} ))

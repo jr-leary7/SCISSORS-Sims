@@ -1,6 +1,21 @@
+# fetch lung reference dataset
+get_lung_ref <- function() {
+  ref <- scRNAseq::ZilionisLungData(which = "human", filter = TRUE)
+  ref <- ref[rowSums(counts(ref) > 0) >= 3, ]  # genes found in >= 3 cells
+  return(ref)
+}
+
+# fetch pancreas reference dataset 
+get_panc_ref <- function() {
+  ref <- scRNAseq::BaronPancreasData(which = "human")
+  ref <- ref[rowSums(counts(ref) > 0) >= 3, ]  # genes found in >= 3 cells
+  return(ref)
+}
+
 # simulate scRNA-seq data 
 simulate_clusters <- function(ref.data = NULL, 
                               clust.n = NULL, 
+                              genes.n = NULL, 
                               genes.p = NULL, 
                               genes.mean.FC = NULL, 
                               genes.sd.FC = NULL) {
@@ -9,7 +24,8 @@ simulate_clusters <- function(ref.data = NULL,
                                                           sceUMI = TRUE,
                                                           useUMI = TRUE,
                                                           protocol = "droplet",
-                                                          numCells = clust.n,
+                                                          numCells = clust.n, 
+                                                          n.genes = genes.n, 
                                                           popHet = c(1, 1), 
                                                           usePops = list(propGenes = genes.p,
                                                                          fc_mean = genes.mean.FC,
