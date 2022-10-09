@@ -4,9 +4,9 @@ library(targets)
 
 # Set target options:
 tar_option_set(
-  packages = c("tibble"), # packages that your targets need to run
-  format = "rds" # default storage format
-  # Set other options as needed.
+  packages = c("scaffold", "SingleCellExperiment", "Seurat", "BiocGenerics"),
+  format = "rds", 
+  garbage_collection = TRUE
 )
 
 # tar_make_clustermq() configuration (okay to leave alone):
@@ -129,7 +129,7 @@ list(
                                                                       genes.n = 15000, 
                                                                       genes.p = c(0, 0.25, 0.4), 
                                                                       genes.mean.FC = c(0, 1.1, 0.2, 
-                                                                                        genes.sd.FC = c(0, 0.4, 0.1))), 
+                                                                                        genes.sd.FC = c(0, 0.4, 0.1)))), 
   tar_target(sim_lung_ncell5000_ngene15000_nclust5, simulate_clusters(ref.data = lung_ref, 
                                                                       clust.n = c(3000, 800, 200, 700, 300), 
                                                                       genes.n = 15000, 

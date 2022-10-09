@@ -1,14 +1,14 @@
 # fetch lung reference dataset
 get_lung_ref <- function() {
   ref <- scRNAseq::ZilionisLungData(which = "human", filter = TRUE)
-  ref <- ref[rowSums(counts(ref) > 0) >= 3, ]  # genes found in >= 3 cells
+  ref <- ref[rowSums(BiocGenerics::counts(ref) > 0) >= 3, ]  # genes found in >= 3 cells
   return(ref)
 }
 
 # fetch pancreas reference dataset 
 get_panc_ref <- function() {
   ref <- scRNAseq::BaronPancreasData(which = "human")
-  ref <- ref[rowSums(counts(ref) > 0) >= 3, ]  # genes found in >= 3 cells
+  ref <- ref[rowSums(BiocGenerics::counts(ref) > 0) >= 3, ]  # genes found in >= 3 cells
   return(ref)
 }
 
@@ -32,7 +32,7 @@ simulate_clusters <- function(ref.data = NULL,
                                                                          fc_sd = genes.sd.FC))
   sim_data <- scaffold::simulateScaffold(scaffoldParams = scaffold_params, originalSCE = ref.data)
   # prepare Seurat object
-  sim_data <- Seurat::CreateSeuratObject(counts = counts(sim_data), 
+  sim_data <- Seurat::CreateSeuratObject(counts = BiocGenerics::countscounts(sim_data), 
                                          meta.data = (as.data.frame(SingleCellExperiment::colData(sim_data))), 
                                          min.cells = 3, 
                                          min.features = 200) %>% 
