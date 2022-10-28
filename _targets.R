@@ -1,6 +1,9 @@
-# Load packages required to define the pipeline:
+library(future)
 library(targets)
-# library(tarchetypes) # Load other packages as needed. # nolint
+library(tarchetypes)
+library(future.callr)
+
+future::plan(future.callr::callr)
 
 # Set target options:
 tar_option_set(

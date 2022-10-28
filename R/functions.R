@@ -20,19 +20,19 @@ simulate_clusters <- function(ref.data = NULL,
                               genes.mean.FC = NULL, 
                               genes.sd.FC = NULL) {
   # simulate dataset 
-  scaffold_params <- scaffold::estimateScaffoldParameters(sce = ref_dataset,
+  scaffold_params <- scaffold::estimateScaffoldParameters(sce = ref.data,
                                                           sceUMI = TRUE,
                                                           useUMI = TRUE,
                                                           protocol = "droplet",
                                                           numCells = clust.n, 
-                                                          n.genes = genes.n, 
+                                                          numGenes = genes.n, 
                                                           popHet = c(1, 1), 
                                                           usePops = list(propGenes = genes.p,
                                                                          fc_mean = genes.mean.FC,
                                                                          fc_sd = genes.sd.FC))
   sim_data <- scaffold::simulateScaffold(scaffoldParams = scaffold_params, originalSCE = ref.data)
   # prepare Seurat object
-  sim_data <- Seurat::CreateSeuratObject(counts = BiocGenerics::countscounts(sim_data), 
+  sim_data <- Seurat::CreateSeuratObject(counts = BiocGenerics::counts(sim_data), 
                                          meta.data = (as.data.frame(SingleCellExperiment::colData(sim_data))), 
                                          min.cells = 3, 
                                          min.features = 200) %>% 

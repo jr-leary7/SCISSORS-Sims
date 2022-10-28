@@ -1,0 +1,7 @@
+name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
+get_lung_ref|function|43e4aaf35bba6224|||||||||||||||
+get_panc_ref|function|a7f383450fde4b43|||||||||||||||
+lung_ref|stem|ea1bf978cbe7c7c2|42a9e59ec860267b|3a1da804b749c3d5|699478188||t19274.7971356083s|0320fa8a02e1e700|110168170|rds|local|vector|||42.197|package S4Vectors was built under R version 4.2.1. package scRNAseq was built under R version 4.2.1|
+panc_ref|stem|c72fb7c980f7d298|23f0786a0a667efb|ae13558feec2d21c|1157115174||t19274.7973684315s|edfc6599bfe7ff4c|36674717|rds|local|vector|||5.615||
+sim_lung_ncell5000_ngene15000_nclust5|stem||5a241c08e61df731|ce72b8a76deca8cd|-156748818||t19274.7973813296s||0|rds|local|vector|||1036.127|package S4Vectors was built under R version 4.2.1|invalid class SummarizedExperiment object 1     xassays is not parallel to xinvalid class SummarizedExperiment object 2     xNAMES is not parallel to xinvalid class SummarizedExperiment object 3     namesx must be NULL or have the length of x
+simulate_clusters|function|2dcd73b8eea29a92|||||||||||||||

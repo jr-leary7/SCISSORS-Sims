@@ -1,0 +1,29 @@
+✔ skip target lung_ref
+• start target sim_lung_ncell5000_ngene15000_nclust5
+✔ skip target panc_ref
+• start target sim_panc_ncell3000_ngene15000_nclust3
+[1] "Estimating capture efficiency..."
+[1] "Finished estimating capture efficiency!"
+[1] "Starting capture step (lysis and reverse transcription)..."
+[1] "Finished capture step!"
+[1] "Starting library prep and sequencing..."
+[1] "Rearranging 10X data"
+[1] "Processing output for 5000 cells."
+[1] "Finished sequencing and data formatting!"
+✖ error target sim_lung_ncell5000_ngene15000_nclust5
+• end pipeline [18.016 minutes]
+Warning messages:
+1: package ‘S4Vectors’ was built under R version 4.2.1 
+2: package ‘S4Vectors’ was built under R version 4.2.1 
+3: 1 targets produced warnings. Run tar_meta(fields = warnings, complete_only = TRUE) for the messages. 
+Error:
+! Error running targets::tar_make_future()
+  Target errors: targets::tar_meta(fields = error, complete_only = TRUE)
+  Tips: https://books.ropensci.org/targets/debugging.html
+  Last error: invalid class “SummarizedExperiment” object: 1: 
+    'x@assays' is not parallel to 'x'
+invalid class “SummarizedExperiment” object: 2: 
+    'x@NAMES' is not parallel to 'x'
+invalid class “SummarizedExperiment” object: 3: 
+    'names(x)' must be NULL or have the length of 'x'
+Execution halted
