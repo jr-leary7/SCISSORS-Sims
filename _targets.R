@@ -153,5 +153,5 @@ list(
   tar_target(clustres_lung_ncell5000_nclust7, evaluate_clustering_all(sim.data = sim_lung_ncell5000_nclust7)), 
   
   ##### simulation analysis 
-  tar_render(simulation_summary, "SCISSORS_Simulation_Summary.Rmd")
+  tar_render(simulation_summary, "SCISSORS_Simulation_Summary.Rmd", cue = tar_cue(mode = "never"))
 )

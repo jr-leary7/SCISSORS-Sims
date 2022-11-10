@@ -80,13 +80,33 @@ First we'll look at the distribution of ARI values achieved by each method over 
 p0 <- ggplot(sim_results, aes(x = method, y = ari, fill = method)) + 
       facet_wrap(~reference) + 
       geom_violin(draw_quantiles = 0.5, color = "black", size = 1) + 
-      labs(fill = "Method", y = "Adjusted Rand Index") + 
+      labs(fill = "Clustering Method", y = "Adjusted Rand Index") + 
+      scale_y_continuous(labels = scales::percent_format()) + 
       scale_fill_paletteer_d("MetBrewer::Egypt") + 
-      theme_bw(base_size = 14)  + 
+      theme_classic(base_size = 14)  + 
       theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.9), 
             axis.title.x = element_blank(), 
-            panel.grid.major.x = element_blank())
+            panel.grid.major.y = element_line())
 p0
+```
+
+Next we'll subset the data to only include ARI values in the top quartile for each method, which we are doing in order to mimic reasonable parameter selection by experienced researchers. 
+
+```{r, fig.width=10}
+sim_results %>% 
+  with_groups(method, 
+              filter, 
+              ari >= quantile(ari, 0.75)) %>% 
+  ggplot(aes(x = method, y = ari, fill = method)) + 
+      facet_wrap(~reference) + 
+      geom_violin(draw_quantiles = 0.5, color = "black", size = 1) + 
+      labs(fill = "Clustering Method", y = "Adjusted Rand Index") + 
+      scale_y_continuous(labels = scales::percent_format()) + 
+      scale_fill_paletteer_d("MetBrewer::Egypt") + 
+      theme_classic(base_size = 14)  + 
+      theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.9), 
+            axis.title.x = element_blank(), 
+            panel.grid.major.y = element_line())
 ```
 
 # Save Figures
@@ -104,3 +124,30 @@ fig_save <- function(plot.obj, plot.name = "", dims = c(8, 5)) {
 }
 ```
 
+
+### SAFE
+
+```{r, eval=FALSE}
+library(SAFEclustering)
+tar_load(sim_panc_ncell1000_nclust3)
+# throws an error because of something factor-related
+SAFE_res <- individual_clustering(inputTags = data.frame(GetAssayData(sim_panc_ncell1000_nclust3, slot = "counts")), 
+                                  mt_filter = FALSE, 
+                                  nGene_filter = FALSE, 
+                                  SC3 = TRUE, 
+                                  gene_filter = FALSE, 
+                                  CIDR = FALSE, 
+                                  nPC.seurat = 30,
+                                  Seurat = TRUE, 
+                                  tSNE = TRUE, 
+                                  low.genes = 200, 
+                                  SEED = 312)
+clust_ensembl <- SAFE(cluster_results = SAFE_res, 
+                      program.dir = "/nas/longleaf/home/jrleary/repos/SAFEclustering/gpmetis_and_shmetis_for_Linux", 
+                      HGPA = TRUE, 
+                      MCLA = TRUE, 
+                      CSPA = TRUE, 
+                      SEED = 312)
+mclust::adjustedRandIndex(sim_panc_ncell1000_nclust3$cellPopulation)
+
+```

@@ -56,11 +56,13 @@ simulate_clusters <- function(ref.data = NULL,
 # run SCISSORS clustering
 evaluate_SCISSORS <- function(seu.obj = NULL, 
                               orig.clusters = NULL) {
-  # check input 
+  # check inputs
   if (is.null(seu.obj) | is.null(orig.clusters)) { stop("arguments must be non-NULL.") }
   # evaluate method
   res <- SCISSORS::ReclusterCells(seurat.object = seu.obj, 
                                   which.clust = unique(seu.obj$seurat_clusters), 
+                                  resolution.vals = seq(0.1, 0.7, by = c(0.1)), 
+                                  k.vals = c(10, 25, 50, 75), 
                                   merge.clusters = TRUE, 
                                   use.sct = FALSE, 
                                   n.HVG = 2000, 
@@ -76,10 +78,10 @@ evaluate_SCISSORS <- function(seu.obj = NULL,
 }
 
 # run Seurat Louvain clustering 
-evaluate_Seurat <- function(seu.obj = NULL, 
-                            res.vals = NULL, 
-                            orig.clusters = NULL) {
-  # check input 
+evaluate_Seurat_Louvain <- function(seu.obj = NULL, 
+                                    res.vals = NULL, 
+                                    orig.clusters = NULL) {
+  # check inputs
   if (is.null(seu.obj) | is.null(res.vals) | is.null(orig.clusters)) { stop("arguments must be non-NULL.") }
   # evaluate method
   reclust_results <- purrr::map_dbl(res.vals, function(x) {
@@ -99,11 +101,37 @@ evaluate_Seurat <- function(seu.obj = NULL,
   return(clustering_res)
 }
 
+# run Seurat Leiden clustering 
+evaluate_Seurat_Leiden <- function(seu.obj = NULL, 
+                                   res.vals = NULL, 
+                                   orig.clusters = NULL) {
+  # check inputs
+  if (is.null(seu.obj) | is.null(res.vals) | is.null(orig.clusters)) { stop("arguments must be non-NULL.") }
+  # set Python virtual environment
+  reticulate::use_virtualenv("/nas/longleaf/home/jrleary/Python", required = TRUE)
+  # evaluate method
+  reclust_results <- purrr::map_dbl(res.vals, function(x) {
+    seu_obj_reclust <- Seurat::FindClusters(seu.obj, 
+                                            resolution = x, 
+                                            algorithm = 4, 
+                                            random.seed = 312, 
+                                            verbose = FALSE)
+    ARI <- mclust::adjustedRandIndex(orig.clusters, seu_obj_reclust$seurat_clusters)
+    return(ARI)
+  })
+  # collate results
+  clustering_res <- data.frame(parameter = res.vals, 
+                               parameter_type = "Resolution", 
+                               ari = reclust_results, 
+                               method = "Louvain (Seurat)")
+  return(clustering_res)
+}
+
 # run hierarchical clustering 
 evaluate_hclust <- function(seu.obj = NULL, 
                             k.vals = NULL, 
                             orig.clusters = NULL) {
-  # check input 
+  # check inputs
   if (is.null(seu.obj) | is.null(k.vals) | is.null(orig.clusters)) { stop("arguments must be non-NULL.") }
   # evaluate method
   hclust_tree <- hclust(dist(seu.obj@reductions$pca@cell.embeddings[, 1:30]), method = "ward.D2")
@@ -124,7 +152,7 @@ evaluate_hclust <- function(seu.obj = NULL,
 evaluate_kmeans <- function(seu.obj = NULL, 
                             k.vals = NULL, 
                             orig.clusters = NULL) {
-  # check input 
+  # check inputs
   if (is.null(seu.obj) | is.null(k.vals) | is.null(orig.clusters)) { stop("arguments must be non-NULL.") }
   # evaluate method
   kmeans_ari <- purrr::map_dbl(k.vals, function(x) {
@@ -143,22 +171,62 @@ evaluate_kmeans <- function(seu.obj = NULL,
   return(clustering_res)
 }
 
+evaluate_dbscan <- function(seu.obj = NULL, 
+                            orig.clusters = NULL) {
+  # check inputs
+  if (is.null(seu.obj) | is.null(orig.clusters)) { stop("arguments must be non-NULL.") }
+  # choose possible values of epsilon via segmented regression
+  Y <- sort(dbscan::kNNdist(seu.obj@reductions$pca@cell.embeddings[, 1:30], k = 10))
+  X <- 1:ncol(seu.obj)
+  base_lm <- lm(Y ~ X)
+  breakpoint_vals <- purrr::map(c(1:4), function(x) {
+    seg_reg <- segmented::segmented.lm(base_lm, npsi = x)
+    breakpoints <- as.numeric(seg_reg$psi[, 2])
+    return(breakpoints)
+  })
+  breakpoint_vals <- unique(unlist(breakpoint_vals))
+  eps_vals <- purrr::map_dbl(breakpoint_vals, function(x) {
+    eps <- Y[which.min(abs(X - x))]
+    return(eps)
+  })
+  eps_vals <- unique(round(eps_vals))
+  # evaluate method 
+  dbscan_ari <- purrr::map_dbl(eps_vals, function(x) {
+    dens_clust <- dbscan(scale(seu.obj@reductions$pca@cell.embeddings[, 1:30], scale = FALSE), 
+                         eps = x, 
+                         minPts = 5, 
+                         borderPoints = TRUE)
+    ARI <- mclust::adjustedRandIndex(orig.clusters, dens_clust$cluster)
+    return(ARI)
+  })
+  # collate results
+  clustering_res <- data.frame(parameter = eps_vals, 
+                               parameter_type = "Epsilon", 
+                               ari = dbscan_ari, 
+                               method = "DBSCAN")
+  return(clustering_res)
+}
 # run all clustering methods for a given dataset 
 evaluate_clustering_all <- function(sim.data = NULL) {
-  # check input 
+  # check inputs
   if (is.null(sim.data)) { stop("sim.data must be non-NULL.") }
   # evaluate all methods 
   SCISSORS_res <- evaluate_SCISSORS(seu.obj = sim.data, orig.clusters = sim.data$cellPopulation)
-  Seurat_res <- evaluate_Seurat(seu.obj = sim.data, 
-                                res.vals = seq(0.1, 1.5, by = 0.1), 
-                                orig.clusters = sim.data$cellPopulation)
+  Louvain_res <- evaluate_Seurat_Louvain(seu.obj = sim.data, 
+                                         res.vals = seq(0.1, 1.5, by = 0.1), 
+                                         orig.clusters = sim.data$cellPopulation)
+  Leiden_res <- evaluate_Seurat_Leiden(seu.obj = sim.data, 
+                                       res.vals = seq(0.1, 1.5, by = 0.1), 
+                                       orig.clusters = sim.data$cellPopulation)
   kmeans_res <- evaluate_kmeans(seu.obj = sim.data, 
                                 k.vals = c(2:10), 
                                 orig.clusters = sim.data$cellPopulation)
   hclust_res <- evaluate_hclust(seu.obj = sim.data, 
                                 k.vals = c(2:10), 
                                 orig.clusters = sim.data$cellPopulation)
+  dbscan_res <- evaluate_dbscan(seu.obj = sim.data, 
+                                orig.clusters = sim.data$cellPopulation)
   # collate results
-  clustering_res_all <- purrr::reduce(list(SCISSORS_res, Seurat_res, kmeans_res, hclust_res), rbind)
+  clustering_res_all <- purrr::reduce(list(SCISSORS_res, Louvain_res, Leiden_res, kmeans_res, hclust_res, dbscan_res), rbind)
   return(clustering_res_all)
 }
