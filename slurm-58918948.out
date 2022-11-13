@@ -1,0 +1,251 @@
+✔ skip target panc_ref
+✔ skip target sim_panc_ncell10000_nclust3
+• start target sim_panc_ncell10000_nclust5
+✔ skip target lung_ref
+✔ skip target sim_panc_ncell10000_nclust7
+✔ skip target sim_lung_ncell5000_nclust3
+• start target sim_lung_ncell5000_nclust5
+✔ skip target sim_lung_ncell3000_nclust3
+• start target sim_lung_ncell5000_nclust7
+✔ skip target sim_lung_ncell3000_nclust5
+• start target sim_lung_ncell1000_nclust3
+[1] "Estimating capture efficiency..."
+[1] "Finished estimating capture efficiency!"
+[1] "Starting capture step (lysis and reverse transcription)..."
+[1] "Finished capture step!"
+[1] "Starting library prep and sequencing..."
+[1] "Rearranging 10X data"
+[1] "Processing output for 5000 cells."
+[1] "Finished sequencing and data formatting!"
+• built target sim_lung_ncell5000_nclust5 [22.097 minutes]
+• start target sim_lung_ncell3000_nclust7
+[1] "Estimating capture efficiency..."
+[1] "Finished estimating capture efficiency!"
+[1] "Starting capture step (lysis and reverse transcription)..."
+[1] "Finished capture step!"
+[1] "Starting library prep and sequencing..."
+[1] "Rearranging 10X data"
+[1] "Processing output for 5000 cells."
+[1] "Finished sequencing and data formatting!"
+• built target sim_lung_ncell5000_nclust7 [22.013 minutes]
+• start target sim_lung_ncell1000_nclust5
+✔ skip target sim_lung_ncell10000_nclust3
+• start target sim_lung_ncell1000_nclust7
+[1] "Estimating capture efficiency..."
+[1] "Finished estimating capture efficiency!"
+[1] "Starting capture step (lysis and reverse transcription)..."
+[1] "Finished capture step!"
+[1] "Starting library prep and sequencing..."
+[1] "Rearranging 10X data"
+[1] "Processing output for 1000 cells."
+[1] "Finished sequencing and data formatting!"
+• built target sim_lung_ncell1000_nclust3 [5.107 minutes]
+✔ skip target sim_lung_ncell10000_nclust5
+[1] "Estimating capture efficiency..."
+[1] "Finished estimating capture efficiency!"
+[1] "Starting capture step (lysis and reverse transcription)..."
+[1] "Finished capture step!"
+[1] "Starting library prep and sequencing..."
+[1] "Rearranging 10X data"
+[1] "Processing output for 1000 cells."
+[1] "Finished sequencing and data formatting!"
+✔ skip target sim_panc_ncell5000_nclust3
+• built target sim_lung_ncell1000_nclust5 [4.249 minutes]
+✔ skip target clustres_lung_ncell10000_nclust3
+• start target sim_lung_ncell10000_nclust7
+• start target sim_panc_ncell5000_nclust5
+[1] "Estimating capture efficiency..."
+[1] "Finished estimating capture efficiency!"
+[1] "Starting capture step (lysis and reverse transcription)..."
+[1] "Finished capture step!"
+[1] "Starting library prep and sequencing..."
+[1] "Rearranging 10X data"
+[1] "Processing output for 3000 cells."
+[1] "Finished sequencing and data formatting!"
+• built target sim_lung_ncell3000_nclust7 [12.028 minutes]
+✔ skip target sim_panc_ncell3000_nclust3
+[1] "Estimating capture efficiency..."
+[1] "Finished estimating capture efficiency!"
+[1] "Starting capture step (lysis and reverse transcription)..."
+[1] "Finished capture step!"
+[1] "Starting library prep and sequencing..."
+[1] "Rearranging 10X data"
+[1] "Processing output for 1000 cells."
+[1] "Finished sequencing and data formatting!"
+• built target sim_lung_ncell1000_nclust7 [4.784 minutes]
+✔ skip target clustres_lung_ncell10000_nclust5
+✔ skip target sim_panc_ncell1000_nclust3
+• start target sim_panc_ncell5000_nclust7
+[1] "Estimating capture efficiency..."
+[1] "Finished estimating capture efficiency!"
+[1] "Starting capture step (lysis and reverse transcription)..."
+[1] "Finished capture step!"
+[1] "Starting library prep and sequencing..."
+[1] "Rearranging 10X data"
+[1] "Processing output for 10000 cells."
+[1] "Finished sequencing and data formatting!"
+• built target sim_panc_ncell10000_nclust5 [56.232 minutes]
+✔ skip target sim_panc_ncell3000_nclust5
+• start target sim_panc_ncell3000_nclust7
+[1] "Estimating capture efficiency..."
+[1] "Finished estimating capture efficiency!"
+[1] "Starting capture step (lysis and reverse transcription)..."
+[1] "Finished capture step!"
+[1] "Starting library prep and sequencing..."
+[1] "Rearranging 10X data"
+[1] "Processing output for 5000 cells."
+[1] "Finished sequencing and data formatting!"
+• built target sim_panc_ncell5000_nclust5 [28.436 minutes]
+✔ skip target sim_panc_ncell1000_nclust5
+✔ skip target sim_panc_ncell1000_nclust7
+✔ skip target clustres_lung_ncell3000_nclust3
+✔ skip target clustres_lung_ncell3000_nclust5
+• start target clustres_lung_ncell1000_nclust3
+• start target clustres_lung_ncell3000_nclust7
+[1] "Estimating capture efficiency..."
+[1] "Finished estimating capture efficiency!"
+[1] "Starting capture step (lysis and reverse transcription)..."
+[1] "Finished capture step!"
+[1] "Starting library prep and sequencing..."
+[1] "Rearranging 10X data"
+[1] "Processing output for 10000 cells."
+[1] "Finished sequencing and data formatting!"
+• built target sim_lung_ncell10000_nclust7 [42.558 minutes]
+• start target clustres_lung_ncell10000_nclust7
+[1] "Estimating capture efficiency..."
+[1] "Finished estimating capture efficiency!"
+[1] "Starting capture step (lysis and reverse transcription)..."
+[1] "Finished capture step!"
+[1] "Starting library prep and sequencing..."
+[1] "Rearranging 10X data"
+[1] "Processing output for 3000 cells."
+[1] "Finished sequencing and data formatting!"
+• built target sim_panc_ncell3000_nclust7 [16.403 minutes]
+• start target clustres_lung_ncell1000_nclust5
+[1] "Choosing reclustering candidates automatically."
+[1] "Choosing reclustering candidates automatically."
+[1] "Choosing reclustering candidates automatically."
+• built target clustres_lung_ncell1000_nclust3 [13.084 minutes]
+• start target clustres_lung_ncell1000_nclust7
+[1] "Choosing reclustering candidates automatically."
+[1] "Reclustering cells in cluster 1 using k = 40 & resolution = 0.1; S = 0.258"
+[1] "Choosing reclustering candidates automatically."
+[1] "Reclustering cells in cluster 1 using k = 40 & resolution = 0.1; S = 0.258"
+[1] "Choosing reclustering candidates automatically."
+[1] "Didn't find subclusters in cluster 1; max S = 0.258"
+[1] "Didn't find subclusters in cluster 5; max S = 0.082"
+• built target clustres_lung_ncell3000_nclust7 [29.869 minutes]
+✔ skip target clustres_lung_ncell5000_nclust3
+• start target clustres_lung_ncell5000_nclust5
+[1] "Estimating capture efficiency..."
+[1] "Finished estimating capture efficiency!"
+[1] "Starting capture step (lysis and reverse transcription)..."
+[1] "Finished capture step!"
+[1] "Starting library prep and sequencing..."
+[1] "Rearranging 10X data"
+[1] "Processing output for 4000 cells."
+[1] "Finished sequencing and data formatting!"
+• built target sim_panc_ncell5000_nclust7 [55.543 minutes]
+• start target clustres_lung_ncell5000_nclust7
+[1] "Choosing reclustering candidates automatically."
+[1] "Choosing reclustering candidates automatically."
+[1] "Didn't find subclusters in cluster 0; max S = 0.203"
+[1] "Choosing reclustering candidates automatically."
+[1] "Didn't find subclusters in cluster 0; max S = 0.203"
+[1] "Didn't find subclusters in cluster 1; max S = 0.146"
+[1] "Didn't find subclusters in cluster 3; max S = 0.135"
+• built target clustres_lung_ncell1000_nclust5 [18.986 minutes]
+[1] "Choosing reclustering candidates automatically."
+[1] "Reclustering cells in cluster 0 using k = 10 & resolution = 0.4; S = 0.233"
+[1] "Choosing reclustering candidates automatically."
+[1] "Didn't find subclusters in cluster 0; max S = 0.233"
+[1] "Choosing reclustering candidates automatically."
+[1] "Didn't find subclusters in cluster 0; max S = 0.233"
+[1] "Didn't find subclusters in cluster 3; max S = 0.096"
+[1] "Didn't find subclusters in cluster 6; max S = 0.049"
+✔ skip target clustres_panc_ncell1000_nclust3
+• built target clustres_lung_ncell1000_nclust7 [21.767 minutes]
+✔ skip target clustres_panc_ncell1000_nclust5
+✔ skip target clustres_panc_ncell1000_nclust7
+✔ skip target clustres_panc_ncell10000_nclust3
+• start target clustres_panc_ncell10000_nclust5
+✔ skip target clustres_panc_ncell10000_nclust7
+✔ skip target clustres_panc_ncell3000_nclust3
+[1] "Choosing reclustering candidates automatically."
+[1] "Reclustering cells in cluster 0 using k = 10 & resolution = 0.1; S = 0.423"
+[1] "Choosing reclustering candidates automatically."
+[1] "Reclustering cells in cluster 0 using k = 10 & resolution = 0.1; S = 0.423"
+[1] "Choosing reclustering candidates automatically."
+[1] "Reclustering cells in cluster 0 using k = 10 & resolution = 0.1; S = 0.423"
+✔ skip target clustres_panc_ncell3000_nclust5
+• built target clustres_lung_ncell10000_nclust7 [1.172 hours]
+• start target clustres_panc_ncell3000_nclust7
+[1] "Choosing reclustering candidates automatically."
+[1] "Choosing reclustering candidates automatically."
+[1] "Reclustering cells in cluster 0 using k = 60 & resolution = 0.1; S = 0.302"
+[1] "Didn't find subclusters in cluster 3; max S = 0.141"
+[1] "Choosing reclustering candidates automatically."
+[1] "Didn't find subclusters in cluster 0; max S = 0.302"
+[1] "Didn't find subclusters in cluster 3; max S = 0.141"
+• built target clustres_lung_ncell5000_nclust5 [44.944 minutes]
+✔ skip target clustres_panc_ncell5000_nclust3
+• start target clustres_panc_ncell5000_nclust5
+• start target clustres_panc_ncell5000_nclust7
+[1] "Choosing reclustering candidates automatically."
+[1] "Reclustering cells in cluster 2 using k = 40 & resolution = 0.1; S = 0.372"
+[1] "Choosing reclustering candidates automatically."
+[1] "Reclustering cells in cluster 2 using k = 40 & resolution = 0.1; S = 0.372"
+[1] "Choosing reclustering candidates automatically."
+[1] "Reclustering cells in cluster 2 using k = 40 & resolution = 0.1; S = 0.372"
+[1] "Didn't find subclusters in cluster 4; max S = 0.071"
+• built target clustres_lung_ncell5000_nclust7 [44.387 minutes]
+• start target simulation_qc
+• built target simulation_qc [1.714 minutes]
+[1] "Choosing reclustering candidates automatically."
+[1] "Reclustering cells in cluster 1 using k = 10 & resolution = 0.6; S = 0.317"
+[1] "Choosing reclustering candidates automatically."
+[1] "Reclustering cells in cluster 1 using k = 10 & resolution = 0.6; S = 0.317"
+[1] "Choosing reclustering candidates automatically."
+[1] "Didn't find subclusters in cluster 1; max S = 0.317"
+• built target clustres_panc_ncell3000_nclust7 [16.447 minutes]
+[1] "Choosing reclustering candidates automatically."
+[1] "Choosing reclustering candidates automatically."
+[1] "Didn't find subclusters in cluster 0; max S = 0.044"
+[1] "Didn't find subclusters in cluster 2; max S = 0.214"
+[1] "Choosing reclustering candidates automatically."
+[1] "Didn't find subclusters in cluster 0; max S = 0.044"
+[1] "Didn't find subclusters in cluster 2; max S = 0.214"
+• built target clustres_panc_ncell5000_nclust5 [27.67 minutes]
+[1] "Choosing reclustering candidates automatically."
+[1] "Choosing reclustering candidates automatically."
+[1] "Didn't find subclusters in cluster 0; max S = 0.092"
+[1] "Reclustering cells in cluster 2 using k = 25 & resolution = 0.7; S = 0.269"
+[1] "Choosing reclustering candidates automatically."
+[1] "Didn't find subclusters in cluster 0; max S = 0.092"
+[1] "Didn't find subclusters in cluster 2; max S = 0.269"
+• built target clustres_panc_ncell10000_nclust5 [49.564 minutes]
+[1] "Choosing reclustering candidates automatically."
+[1] "Reclustering cells in cluster 0 using k = 10 & resolution = 0.3; S = 0.242"
+[1] "Choosing reclustering candidates automatically."
+[1] "Didn't find subclusters in cluster 0; max S = 0.242"
+[1] "Didn't find subclusters in cluster 2; max S = 0.215"
+[1] "Choosing reclustering candidates automatically."
+[1] "Didn't find subclusters in cluster 0; max S = 0.242"
+[1] "Didn't find subclusters in cluster 2; max S = 0.215"
+• built target clustres_panc_ncell5000_nclust7 [28.451 minutes]
+• start target simulation_summary
+
+Attaching package: 'patchwork'
+
+The following object is masked from 'package:MASS':
+
+    area
+
+Quitting from lines 71-87 (SCISSORS_Simulation_Summary.Rmd) 
+✖ error target simulation_summary
+Error: Problem while computing `method = factor(...)`.
+Caused by error in `c()`:
+! argument 7 is empty
+
+• end pipeline [3.736 hours]
+There were 50 or more warnings (use warnings() to see the first 50)
