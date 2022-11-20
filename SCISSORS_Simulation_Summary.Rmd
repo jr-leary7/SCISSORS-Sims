@@ -109,6 +109,7 @@ p0a <- ggplot(sim_results, aes(x = method, y = ari, fill = method)) +
        facet_wrap(~reference) + 
        geom_violin(draw_quantiles = 0.5, 
                    color = "black", 
+                   scale = "width", 
                    size = 1) + 
        ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Louvain (Seurat)"), 
                                                 c("SCISSORS", "DBSCAN"), 
@@ -136,6 +137,7 @@ We can make the same plot for overall performance, without splitting by referenc
 p0b <- ggplot(sim_results, aes(x = method, y = ari, fill = method)) + 
        geom_violin(draw_quantiles = 0.5, 
                    color = "black", 
+                   scale = "width", 
                    size = 1) + 
        ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Louvain (Seurat)"), 
                                                 c("SCISSORS", "DBSCAN"), 
@@ -165,6 +167,7 @@ p1a <- ggplot(sim_results, aes(x = method, y = nmi, fill = method)) +
        facet_wrap(~reference) + 
        geom_violin(draw_quantiles = 0.5, 
                    color = "black", 
+                   scale = "width", 
                    size = 1) + 
        ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Louvain (Seurat)"), 
                                                  c("SCISSORS", "DBSCAN"), 
@@ -192,6 +195,7 @@ Again, the entire dataset without splitting by reference.
 p1b <- ggplot(sim_results, aes(x = method, y = nmi, fill = method)) + 
        geom_violin(draw_quantiles = 0.5, 
                    color = "black", 
+                   scale = "width", 
                    size = 1) + 
        ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Louvain (Seurat)"), 
                                                  c("SCISSORS", "DBSCAN"), 
@@ -220,6 +224,7 @@ p2a <- ggplot(sim_results, aes(x = method, y = sil, fill = method)) +
        facet_wrap(~reference) + 
        geom_violin(draw_quantiles = 0.5, 
                    color = "black", 
+                   scale = "width", 
                    size = 1) + 
        ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Louvain (Seurat)"), 
                                                 c("SCISSORS", "DBSCAN"), 
@@ -248,6 +253,7 @@ Without splitting by reference:
 p2b <- ggplot(sim_results, aes(x = method, y = sil, fill = method)) + 
        geom_violin(draw_quantiles = 0.5, 
                    color = "black", 
+                   scale = "width", 
                    size = 1) + 
        ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Louvain (Seurat)"), 
                                                 c("SCISSORS", "DBSCAN"), 
@@ -281,6 +287,7 @@ p3 <- sim_results %>%
       facet_wrap(~reference) + 
       geom_violin(draw_quantiles = 0.5, 
                   color = "black", 
+                  scale = "width", 
                   size = 1) + 
       ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Louvain (Seurat)"), 
                                                 c("SCISSORS", "DBSCAN"), 
@@ -316,6 +323,7 @@ p4 <- sim_results %>%
       facet_wrap(~reference) + 
       geom_violin(draw_quantiles = 0.5, 
                   color = "black", 
+                  scale = "width", 
                   size = 1) + 
       ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Louvain (Seurat)"), 
                                                 c("SCISSORS", "DBSCAN"), 
@@ -351,6 +359,7 @@ p5 <- sim_results %>%
       facet_wrap(~reference) + 
       geom_violin(draw_quantiles = 0.5,
                   color = "black", 
+                  scale = "width", 
                   size = 1) + 
       ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Louvain (Seurat)"), 
                                                 c("SCISSORS", "DBSCAN"), 
@@ -564,7 +573,8 @@ ari_res <- data.frame(ARI = c(mclust::adjustedRandIndex(sim_panc_ncell1000_nclus
                               mclust::adjustedRandIndex(sim_panc_ncell1000_nclust7$cellPopulation, giniclust3_clusts)), 
                       Method = c("SCISSORS", "Louvain", "K-means", "Hierarchical", "DBSCAN", "GiniClust3")) %>% 
            arrange(desc(ARI)) %>% 
-           mutate(ARI_Rank = row_number()) %>% 
+           mutate(ARI_Rank = row_number(), 
+                  across(where(is.numeric), \(x) round(x, 3))) %>% 
            select(Method, ARI, ARI_Rank)
 sil_res <- data.frame(Sil = c(mean(cluster::silhouette(SCISSORS::CosineDist(Embeddings(sim_panc_ncell1000_nclust7, "pca")[, 1:20]), x = SCISSORS_clusts)[, 3]), 
                               mean(cluster::silhouette(SCISSORS::CosineDist(Embeddings(sim_panc_ncell1000_nclust7, "pca")[, 1:20]), x = Louvain_clusts)[, 3]), 
@@ -574,7 +584,8 @@ sil_res <- data.frame(Sil = c(mean(cluster::silhouette(SCISSORS::CosineDist(Embe
                               mean(cluster::silhouette(SCISSORS::CosineDist(Embeddings(sim_panc_ncell1000_nclust7, "pca")[, 1:20]), x = giniclust3_clusts)[, 3])), 
                       Method = c("SCISSORS", "Louvain", "K-means", "Hierarchical", "DBSCAN", "GiniClust3")) %>% 
            arrange(desc(Sil)) %>% 
-           mutate(Sil_Rank = row_number()) %>% 
+           mutate(Sil_Rank = row_number(), 
+                  across(where(is.numeric), \(x) round(x, 3))) %>% 
            select(Method, Sil, Sil_Rank)
 ari_table <- gridExtra::tableGrob(ari_res,
                                   cols = c("Method", "Adj. Rand Index", "Rank"), 
@@ -636,7 +647,8 @@ louvain_metric_res <- data.frame(Res = factor(c(.5, .7, .9, 1.1, 1.5, 2.0),
                                               labels = c("0.5", "0.7", "0.9", "1.1", "1.5", "2.0")), 
                                  ARI = purrr::map_dbl(Louvain_res_incr, \(x) x$ARI), 
                                  Sil = purrr::map_dbl(Louvain_res_incr, \(x) x$ARI)) %>% 
-                      arrange(desc(ARI))
+                      arrange(desc(ARI)) %>% 
+                      mutate(across(where(is.numeric), \(x) round(x, 3)))
 louvain_ari_table <- gridExtra::tableGrob(louvain_metric_res,
                                           cols = c("Resolution", "Adj. Rand Index", "Silhouette"), 
                                           theme = gridExtra::ttheme_minimal(colhead = list(bg_params = list(fill = "grey90"))), 
@@ -714,6 +726,26 @@ p9b <- sim_results %>%
        theme(axis.ticks.x = element_blank(), 
              panel.grid.major.y = element_line())
 p9b
+```
+
+Lastly, we'll make a table of the median runtime per-method, per-dataset size. 
+
+```{r}
+sim_results %>% 
+  mutate(dataset_size = stringr::str_extract(dataset, "ncell.*_"), 
+         dataset_size = stringr::str_replace(stringr::str_replace(dataset_size, "ncell", ""), "_", ""), 
+         dataset_size = as.integer(dataset_size), 
+         dataset_size = factor(dataset_size, 
+                               levels = c(1000L, 3000L, 5000L, 10000L), 
+                               labels = c("1,000", "3,000", "5,000", "10,000"))) %>% 
+  with_groups(c(method, dataset_size), 
+              summarise, 
+              med = median(runtime_minutes)) %>% 
+  arrange(dataset_size, med) %>% 
+  kableExtra::kbl(digits = 3, 
+                  booktabs = TRUE, 
+                  col.names = c("Method", "N Cells", "Median Runtime")) %>% 
+  kableExtra::kable_classic(full_width = FALSE, "hover")
 ```
 
 # Save Figures

@@ -94,3 +94,9 @@ for (p in qc_plots) {
   print(p)
 }
 ```
+
+# Session Info 
+
+```{r}
+sessioninfo::session_info()
+```
