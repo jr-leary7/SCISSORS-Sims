@@ -18,6 +18,8 @@ simulate_clusters <- function(ref.data = NULL,
                               genes.p = NULL, 
                               genes.mean.FC = NULL, 
                               genes.sd.FC = NULL) {
+  # check inputs
+  if (is.null(ref.data) || is.null(clust.n) || is.null(genes.p) || is.null(genes.mean.FC) || is.null(genes.sd.FC)) { stop("arguments must be non-NULL.") }
   # simulate dataset 
   scaffold_params <- scaffold::estimateScaffoldParameters(sce = ref.data,
                                                           sceUMI = TRUE,
@@ -63,7 +65,7 @@ evaluate_SCISSORS <- function(seu.obj = NULL,
                               cutoff.vals = NULL, 
                               orig.clusters = NULL) {
   # check inputs
-  if (is.null(seu.obj) | is.null(cutoff.vals) | is.null(orig.clusters)) { stop("arguments must be non-NULL.") }
+  if (is.null(seu.obj) || is.null(cutoff.vals) || is.null(orig.clusters)) { stop("arguments must be non-NULL.") }
   # evaluate method
   seu.obj <- Seurat::FindNeighbors(seu.obj, 
                                    k.param = sqrt(ncol(seu.obj)), 
@@ -114,9 +116,12 @@ evaluate_SCISSORS <- function(seu.obj = NULL,
                         res$seurat_clusters, 
                         variant = "sqrt")
     sil <- mean(cluster::silhouette(dist = SCISSORS::CosineDist(Seurat::Embeddings(seu.obj, "pca")[, 1:30]), x = as.integer(res$seurat_clusters))[, 3])
+    DB_index <- clusterSim::index.DB(x = Seurat::Embeddings(seu.obj, "pca")[, 1:30], 
+                                     cl = as.integer(seu.obj$seurat_clusters))$DB
     return(list(ARI = ARI, 
                 NMI = NMI, 
                 sil = sil, 
+                DB = DB_index, 
                 runtime = runtime, 
                 runtime_units = runtime_units))
   })
@@ -126,6 +131,7 @@ evaluate_SCISSORS <- function(seu.obj = NULL,
                                ari = purrr::map_dbl(SCISSORS_res, \(x) x$ARI),
                                nmi = purrr::map_dbl(SCISSORS_res, \(x) x$NMI), 
                                sil = purrr::map_dbl(SCISSORS_res, \(x) x$sil), 
+                               db = purrr::map_dbl(SCISSORS_res, \(x) x$DB), 
                                runtime = purrr::map_dbl(SCISSORS_res, \(x) x$runtime), 
                                runtime_units = purrr::map_chr(SCISSORS_res, \(x) x$runtime_units),
                                method = "SCISSORS")
@@ -137,7 +143,7 @@ evaluate_Seurat_Louvain <- function(seu.obj = NULL,
                                     res.vals = NULL, 
                                     orig.clusters = NULL) {
   # check inputs
-  if (is.null(seu.obj) | is.null(res.vals) | is.null(orig.clusters)) { stop("arguments must be non-NULL.") }
+  if (is.null(seu.obj) || is.null(res.vals) || is.null(orig.clusters)) { stop("arguments must be non-NULL.") }
   # evaluate method
   reclust_results <- purrr::map(res.vals, function(x) {
     start_time <- Sys.time()
@@ -155,9 +161,12 @@ evaluate_Seurat_Louvain <- function(seu.obj = NULL,
                         seu_obj_reclust$seurat_clusters, 
                         variant = "sqrt")
     sil <- mean(cluster::silhouette(dist = SCISSORS::CosineDist(Seurat::Embeddings(seu.obj, "pca")[, 1:30]), x = as.integer(seu_obj_reclust$seurat_clusters))[, 3])
+    DB_index <- clusterSim::index.DB(x = Seurat::Embeddings(seu.obj, "pca")[, 1:30], 
+                                     cl = as.integer(seu.obj$seurat_clusters))$DB
     return(list(ARI = ARI, 
                 NMI = NMI, 
                 sil = sil, 
+                DB = DB_index, 
                 runtime = runtime, 
                 runtime_units = runtime_units))
   })
@@ -167,6 +176,7 @@ evaluate_Seurat_Louvain <- function(seu.obj = NULL,
                                ari = purrr::map_dbl(reclust_results, \(x) x$ARI),
                                nmi = purrr::map_dbl(reclust_results, \(x) x$NMI), 
                                sil = purrr::map_dbl(reclust_results, \(x) x$sil), 
+                               db = purrr::map_dbl(reclust_results, \(x) x$DB), 
                                runtime = purrr::map_dbl(reclust_results, \(x) x$runtime), 
                                runtime_units = purrr::map_chr(reclust_results, \(x) x$runtime_units),
                                method = "Louvain (Seurat)")
@@ -178,7 +188,7 @@ evaluate_Seurat_Leiden <- function(seu.obj = NULL,
                                    res.vals = NULL, 
                                    orig.clusters = NULL) {
   # check inputs
-  if (is.null(seu.obj) | is.null(res.vals) | is.null(orig.clusters)) { stop("arguments must be non-NULL.") }
+  if (is.null(seu.obj) || is.null(res.vals) || is.null(orig.clusters)) { stop("arguments must be non-NULL.") }
   # set Python virtual environment
   reticulate::use_virtualenv("/nas/longleaf/home/jrleary/Python", required = TRUE)
   # evaluate method
@@ -198,9 +208,12 @@ evaluate_Seurat_Leiden <- function(seu.obj = NULL,
                         seu_obj_reclust$seurat_clusters, 
                         variant = "sqrt")
     sil <- mean(cluster::silhouette(dist = SCISSORS::CosineDist(Seurat::Embeddings(seu.obj, "pca")[, 1:30]), x = as.integer(seu_obj_reclust$seurat_clusters))[, 3])
+    DB_index <- clusterSim::index.DB(x = Seurat::Embeddings(seu.obj, "pca")[, 1:30], 
+                                     cl = as.integer(seu.obj$seurat_clusters))$DB
     return(list(ARI = ARI, 
                 NMI = NMI, 
                 sil = sil, 
+                DB = DB_index, 
                 runtime = runtime, 
                 runtime_units = runtime_units))
   })
@@ -210,6 +223,7 @@ evaluate_Seurat_Leiden <- function(seu.obj = NULL,
                                ari = purrr::map_dbl(reclust_results, \(x) x$ARI),
                                nmi = purrr::map_dbl(reclust_results, \(x) x$NMI), 
                                sil = purrr::map_dbl(reclust_results, \(x) x$sil), 
+                               db = purrr::map_dbl(reclust_results, \(x) x$DB), 
                                runtime = purrr::map_dbl(reclust_results, \(x) x$runtime), 
                                runtime_units = purrr::map_chr(reclust_results, \(x) x$runtime_units),
                                method = "Leiden (Seurat)")
@@ -221,7 +235,7 @@ evaluate_hclust <- function(seu.obj = NULL,
                             k.vals = NULL, 
                             orig.clusters = NULL) {
   # check inputs
-  if (is.null(seu.obj) | is.null(k.vals) | is.null(orig.clusters)) { stop("arguments must be non-NULL.") }
+  if (is.null(seu.obj) || is.null(k.vals) || is.null(orig.clusters)) { stop("arguments must be non-NULL.") }
   # evaluate method
   hclust_ari <- purrr::map(k.vals, function(x) {
     start_time <- Sys.time()
@@ -236,9 +250,12 @@ evaluate_hclust <- function(seu.obj = NULL,
                         hclust_res, 
                         variant = "sqrt")
     sil <- mean(cluster::silhouette(dist = SCISSORS::CosineDist(Seurat::Embeddings(seu.obj, "pca")[, 1:30]), x = hclust_res)[, 3])
+    DB_index <- clusterSim::index.DB(x = Seurat::Embeddings(seu.obj, "pca")[, 1:30], 
+                                     cl = as.integer(seu.obj$seurat_clusters))$DB
     return(list(ARI = ARI, 
                 NMI = NMI, 
                 sil = sil, 
+                DB = DB_index, 
                 runtime = runtime, 
                 runtime_units = runtime_units))
   })
@@ -248,6 +265,7 @@ evaluate_hclust <- function(seu.obj = NULL,
                                ari = purrr::map_dbl(hclust_ari, \(x) x$ARI),
                                nmi = purrr::map_dbl(hclust_ari, \(x) x$NMI), 
                                sil = purrr::map_dbl(hclust_ari, \(x) x$sil), 
+                               db = purrr::map_dbl(hclust_ari, \(x) x$DB), 
                                runtime = purrr::map_dbl(hclust_ari, \(x) x$runtime), 
                                runtime_units = purrr::map_chr(hclust_ari, \(x) x$runtime_units),
                                method = "Hierarchical (Ward)")
@@ -259,7 +277,7 @@ evaluate_kmeans <- function(seu.obj = NULL,
                             k.vals = NULL, 
                             orig.clusters = NULL) {
   # check inputs
-  if (is.null(seu.obj) | is.null(k.vals) | is.null(orig.clusters)) { stop("arguments must be non-NULL.") }
+  if (is.null(seu.obj) || is.null(k.vals) || is.null(orig.clusters)) { stop("arguments must be non-NULL.") }
   # evaluate method
   kmeans_ari <- purrr::map(k.vals, function(x) {
     start_time <- Sys.time()
@@ -276,9 +294,12 @@ evaluate_kmeans <- function(seu.obj = NULL,
                         clust_res$cluster, 
                         variant = "sqrt")
     sil <- mean(cluster::silhouette(dist = SCISSORS::CosineDist(Seurat::Embeddings(seu.obj, "pca")[, 1:30]), x = clust_res$cluster)[, 3])
+    DB_index <- clusterSim::index.DB(x = Seurat::Embeddings(seu.obj, "pca")[, 1:30], 
+                                     cl = as.integer(seu.obj$seurat_clusters))$DB
     return(list(ARI = ARI, 
                 NMI = NMI, 
                 sil = sil, 
+                DB = DB_index, 
                 runtime = runtime, 
                 runtime_units = runtime_units))
   })
@@ -288,6 +309,7 @@ evaluate_kmeans <- function(seu.obj = NULL,
                                ari = purrr::map_dbl(kmeans_ari, \(x) x$ARI),
                                nmi = purrr::map_dbl(kmeans_ari, \(x) x$NMI), 
                                sil = purrr::map_dbl(kmeans_ari, \(x) x$sil), 
+                               db = purrr::map_dbl(kmeans_ari, \(x) x$DB), 
                                runtime = purrr::map_dbl(kmeans_ari, \(x) x$runtime), 
                                runtime_units = purrr::map_chr(kmeans_ari, \(x) x$runtime_units),
                                method = "K-means (Hartigan-Wong)")
@@ -298,7 +320,7 @@ evaluate_kmeans <- function(seu.obj = NULL,
 evaluate_dbscan <- function(seu.obj = NULL, 
                             orig.clusters = NULL) {
   # check inputs
-  if (is.null(seu.obj) | is.null(orig.clusters)) { stop("arguments must be non-NULL.") }
+  if (is.null(seu.obj) || is.null(orig.clusters)) { stop("arguments must be non-NULL.") }
   # estimate possible values of epsilon via repeated segmented regression
   Y <- sort(dbscan::kNNdist(seu.obj@reductions$pca@cell.embeddings[, 1:30], k = 10))
   X <- 1:ncol(seu.obj)
@@ -330,9 +352,12 @@ evaluate_dbscan <- function(seu.obj = NULL,
                         dens_clust$cluster, 
                         variant = "sqrt")
     sil <- mean(cluster::silhouette(dist = SCISSORS::CosineDist(Seurat::Embeddings(seu.obj, "pca")[, 1:30]), x = dens_clust$cluster)[, 3])
+    DB_index <- clusterSim::index.DB(x = Seurat::Embeddings(seu.obj, "pca")[, 1:30], 
+                                     cl = as.integer(seu.obj$seurat_clusters))$DB
     return(list(ARI = ARI, 
                 NMI = NMI, 
                 sil = sil, 
+                DB = DB_index, 
                 runtime = runtime, 
                 runtime_units = runtime_units))
   })
@@ -342,6 +367,7 @@ evaluate_dbscan <- function(seu.obj = NULL,
                                ari = purrr::map_dbl(dbscan_ari, \(x) x$ARI),
                                nmi = purrr::map_dbl(dbscan_ari, \(x) x$NMI), 
                                sil = purrr::map_dbl(dbscan_ari, \(x) x$sil), 
+                               db = purrr::map_dbl(dbscan_ari, \(x) x$DB), 
                                runtime = purrr::map_dbl(dbscan_ari, \(x) x$runtime), 
                                runtime_units = purrr::map_chr(dbscan_ari, \(x) x$runtime_units),
                                method = "DBSCAN")
@@ -353,7 +379,7 @@ evaluate_giniclust <- function(seu.obj = NULL,
                                res.vals = NULL, 
                                orig.clusters = NULL) {
   # check inputs
-  if (is.null(seu.obj) | is.null(res.vals) | is.null(orig.clusters)) { stop("arguments must be non-NULL.") }
+  if (is.null(seu.obj) || is.null(res.vals) || is.null(orig.clusters)) { stop("arguments must be non-NULL.") }
   reticulate::use_virtualenv("/nas/longleaf/home/jrleary/Python", required = TRUE)
   reticulate::source_python("./Python/run_GiniClust3.py")
   # evaluate method
@@ -369,9 +395,12 @@ evaluate_giniclust <- function(seu.obj = NULL,
                         gc3_clust$finalCluster, 
                         variant = "sqrt")
     sil <- mean(cluster::silhouette(dist = SCISSORS::CosineDist(Seurat::Embeddings(seu.obj, "pca")[, 1:30]), x = as.integer(gc3_clust$finalCluster))[, 3])
+    DB_index <- clusterSim::index.DB(x = Seurat::Embeddings(seu.obj, "pca")[, 1:30], 
+                                     cl = as.integer(seu.obj$seurat_clusters))$DB
     return(list(ARI = ARI, 
                 NMI = NMI, 
                 sil = sil, 
+                DB = DB_index, 
                 runtime = runtime, 
                 runtime_units = runtime_units))
   })
@@ -381,9 +410,64 @@ evaluate_giniclust <- function(seu.obj = NULL,
                                ari = purrr::map_dbl(gc3_ari, \(x) x$ARI),
                                nmi = purrr::map_dbl(gc3_ari, \(x) x$NMI), 
                                sil = purrr::map_dbl(gc3_ari, \(x) x$sil), 
+                               db = purrr::map_dbl(gc3_ari, \(x) x$DB), 
                                runtime = purrr::map_dbl(gc3_ari, \(x) x$runtime), 
                                runtime_units = purrr::map_chr(gc3_ari, \(x) x$runtime_units),
                                method = "GiniClust3")
+  return(clustering_res)
+}
+
+# CellSIUS 
+evaluate_CellSIUS <- function(seu.obj = NULL, 
+                              fc.vals = NULL, 
+                              orig.clusters = NULL) {
+  # check inputs
+  if (is.null(seu.obj) || is.null(fc.vals) || is.null(orig.clusters)) { stop("arguments must be non-NULL.") }
+  # evaluate method
+  seu.obj <- Seurat::FindClusters(seu.obj, 
+                                  resolution = 0.25, 
+                                  algorithm = 1, 
+                                  verbose = FALSE, 
+                                  random.seed = 312)
+  cellsius_ari <- purrr::map(fc.vals, function(x) {
+    start_time <- Sys.time()
+    cellsius_res <- CellSIUS::CellSIUS(mat.norm = as.matrix(seu.obj@assays$RNA@data),
+                                       min_fc = x, 
+                                       group_id = as.factor(seu.obj$seurat_clusters), 
+                                       mcl_path = "/nas/longleaf/rhel8/apps/mcl/14-137/bin/mcl")
+    if (all(is.na(cellsius_res))) {
+      cellsius_clust <- as.factor(seu.obj$seurat_clusters)
+    } else {
+      cellsius_clust <- as.factor(CellSIUS::CellSIUS_final_cluster_assignment(cellsius_res, group_id = as.factor(seu.obj$seurat_clusters)))
+    }
+    end_time <- Sys.time()
+    time_diff <- end_time - start_time
+    runtime <- as.numeric(time_diff[[1]])
+    runtime_units <- attributes(time_diff)$units
+    ARI <- mclust::adjustedRandIndex(orig.clusters, cellsius_clust)
+    NMI <- aricode::NMI(orig.clusters, 
+                        cellsius_clust, 
+                        variant = "sqrt")
+    sil <- mean(cluster::silhouette(dist = SCISSORS::CosineDist(Seurat::Embeddings(seu.obj, "pca")[, 1:30]), x = as.integer(cellsius_clust))[, 3])
+    DB_index <- clusterSim::index.DB(x = Seurat::Embeddings(seu.obj, "pca")[, 1:30], 
+                                     cl = as.integer(cellsius_clust))$DB
+    return(list(ARI = ARI, 
+                NMI = NMI, 
+                sil = sil, 
+                DB = DB_index, 
+                runtime = runtime, 
+                runtime_units = runtime_units))
+  })
+  # collate results
+  clustering_res <- data.frame(parameter = fc.vals, 
+                               parameter_type = "Minimum Gene log2FC", 
+                               ari = purrr::map_dbl(cellsius_ari, \(x) x$ARI),
+                               nmi = purrr::map_dbl(cellsius_ari, \(x) x$NMI), 
+                               sil = purrr::map_dbl(cellsius_ari, \(x) x$sil), 
+                               db = purrr::map_dbl(cellsius_ari, \(x) x$DB), 
+                               runtime = purrr::map_dbl(cellsius_ari, \(x) x$runtime), 
+                               runtime_units = purrr::map_chr(cellsius_ari, \(x) x$runtime_units),
+                               method = "CellSIUS")
   return(clustering_res)
 }
 
@@ -412,8 +496,11 @@ evaluate_clustering_all <- function(sim.data = NULL) {
   giniclust3_res <- evaluate_giniclust(seu.obj = sim.data,
                                        res.vals = seq(0.1, 1.3, by = 0.1), 
                                        orig.clusters = sim.data$cellPopulation)
+  cellsius_res <- evaluate_CellSIUS(seu.obj = sim.data, 
+                                    fc.vals = c(0.25, 0.5, 0.75, 1, 1.5, 2), 
+                                    orig.clusters = sim.data$cellPopulation)
   # collate results
-  clustering_res_all <- purrr::reduce(list(SCISSORS_res, Louvain_res, Leiden_res, kmeans_res, hclust_res, dbscan_res, giniclust3_res), 
+  clustering_res_all <- purrr::reduce(list(SCISSORS_res, Louvain_res, Leiden_res, kmeans_res, hclust_res, dbscan_res, giniclust3_res, cellsius_res), 
                                       rbind)
   return(clustering_res_all)
 }

@@ -1,0 +1,45 @@
+✔ skip target panc_ref
+✔ skip target sim_panc_ncell10000_nclust3
+✔ skip target sim_panc_ncell10000_nclust5
+✔ skip target lung_ref
+✔ skip target sim_panc_ncell10000_nclust7
+✔ skip target sim_lung_ncell5000_nclust3
+✔ skip target sim_lung_ncell5000_nclust5
+✔ skip target sim_lung_ncell3000_nclust3
+✔ skip target sim_lung_ncell5000_nclust7
+✔ skip target sim_lung_ncell3000_nclust5
+✔ skip target sim_lung_ncell1000_nclust3
+✔ skip target sim_lung_ncell3000_nclust7
+✔ skip target sim_lung_ncell1000_nclust5
+✔ skip target sim_lung_ncell10000_nclust3
+✔ skip target sim_lung_ncell1000_nclust7
+✔ skip target sim_lung_ncell10000_nclust5
+✔ skip target sim_panc_ncell5000_nclust3
+• start target clustres_lung_ncell10000_nclust3
+✔ skip target sim_lung_ncell10000_nclust7
+✔ skip target sim_panc_ncell5000_nclust5
+✔ skip target sim_panc_ncell3000_nclust3
+• start target clustres_lung_ncell10000_nclust5
+[1] "Choosing reclustering candidates automatically."
+[1] "Reclustering cells in cluster 3 using k = 25 & resolution = 0.7; S = 0.151"
+[1] "Choosing reclustering candidates automatically."
+[1] "Reclustering cells in cluster 0 using k = 10 & resolution = 0.1; S = 0.496"
+[1] "Didn't find subclusters in cluster 3; max S = 0.151"
+[1] "Didn't find subclusters in cluster 4; max S = 0.07"
+[1] "Choosing reclustering candidates automatically."
+[1] "Reclustering cells in cluster 0 using k = 10 & resolution = 0.1; S = 0.496"
+[1] "Didn't find subclusters in cluster 3; max S = 0.151"
+[1] "Didn't find subclusters in cluster 4; max S = 0.07"
+[1] "No subclusters found, returning NA."
+• built target clustres_lung_ncell10000_nclust3 [2.945 hours]
+✔ skip target sim_panc_ncell1000_nclust3
+• start target sim_panc_ncell5000_nclust7
+• end pipeline [4.37 hours]
+There were 50 or more warnings (use warnings() to see the first 50)
+Error:
+! Error running targets::tar_make_future()
+  Target errors: targets::tar_meta(fields = error, complete_only = TRUE)
+  Tips: https://books.ropensci.org/targets/debugging.html
+  Last error: CallrFuture (clustres_lung_ncell10000_nclust5) failed. The reason reported was ‘! callr subprocess failed: could not start R, exited with non-zero status, has crashed or was killed’. Post-mortem diagnostic: The parallel worker (PID 3687574) started at 2023-03-06T03:42:32+0000 finished with exit code -9. The total size of the 19 globals exported is 321.13 KiB. The three largest globals are ‘evaluate_dbscan’ (42.79 KiB of class ‘function’), ‘evaluate_SCISSORS’ (42.66 KiB of class ‘function’) and ‘evaluate_CellSIUS’ (34.05 KiB of class ‘function’)
+Execution halted
+slurmstepd: error: Detected 1 oom-kill event(s) in StepId=1899741.batch. Some of your processes may have been killed by the cgroup out-of-memory handler.

@@ -4,20 +4,22 @@ library(tarchetypes)
 library(future.callr)
 
 future::plan(future.callr::callr)
+options(future.globals.maxSize = 100000 * 1024^2)  # 100GB max size 
 
-tar_option_set(packages = c("scaffold", 
-                            "SingleCellExperiment", 
+tar_option_set(packages = c("stats", 
+                            "mclust", 
                             "Seurat", 
-                            "BiocGenerics", 
+                            "dbscan", 
+                            "cluster", 
+                            "aricode", 
+                            "scaffold", 
                             "magrittr", 
                             "segmented",
-                            "dbscan", 
-                            "reticulate", 
                             "tidyverse",
-                            "stats", 
-                            "mclust", 
-                            "aricode", 
-                            "cluster"),
+                            "clusterSim", 
+                            "reticulate", 
+                            "BiocGenerics", 
+                            "SingleCellExperiment"),
                format = "rds", 
                garbage_collection = TRUE, 
                error = "continue")
@@ -201,6 +203,6 @@ list(
   tar_target(clustres_lung_ncell10000_nclust7, evaluate_clustering_all(sim.data = sim_lung_ncell10000_nclust7)), 
   
   ##### summary & analysis documents
-  tar_render(simulation_qc, "SCISSORS_Simulated_Data_QC.Rmd"), 
-  tar_render(simulation_summary, "SCISSORS_Simulation_Summary.Rmd")
+  tar_render(simulation_qc, "./Reports/SCISSORS_Simulated_Data_QC.Rmd"), 
+  tar_render(simulation_summary, "./Reports/SCISSORS_Simulation_Summary.Rmd", cue = tar_cue(mode = "never"))
 )

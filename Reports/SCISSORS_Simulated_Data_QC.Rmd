@@ -1,0 +1,105 @@
+---
+title: "SCISSORS Simulation Study Data Quality Control"
+subtitle: "Jack Leary, M.S." 
+author:
+  - "UF Dept. of Biostatistics" 
+  - "UNC Lineberger Comprehensive Cancer Center"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: journal
+    highlight: tango
+    code_folding: show
+    code_download: true 
+    toc: true
+    toc_depth: 2
+    toc_float: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, comment = NA); set.seed(312)  # lucky seed
+```
+
+# Libraries 
+
+First we'll load in the packages we need to tidy & analyze our simulation results. 
+
+```{r, results='hide', message=FALSE, warning=FALSE}
+library(dplyr)      # data manipulation 
+library(Seurat)     # scRNA-seq methods & data structures
+library(ggplot2)    # plots
+library(targets)    # pipeline tools
+library(paletteer)  # plot colors 
+```
+
+# Data 
+
+Next we'll load in all the simulated datasets. 
+
+```{r}
+# pancreas reference 
+tar_load(sim_panc_ncell1000_nclust3)
+tar_load(sim_panc_ncell1000_nclust5)
+tar_load(sim_panc_ncell1000_nclust7)
+tar_load(sim_panc_ncell3000_nclust3)
+tar_load(sim_panc_ncell3000_nclust5)
+tar_load(sim_panc_ncell3000_nclust7)
+tar_load(sim_panc_ncell5000_nclust3)
+tar_load(sim_panc_ncell5000_nclust5)
+tar_load(sim_panc_ncell5000_nclust7)
+tar_load(sim_panc_ncell10000_nclust3)
+tar_load(sim_panc_ncell10000_nclust5)
+tar_load(sim_panc_ncell10000_nclust7)
+# lung reference
+tar_load(sim_lung_ncell1000_nclust3)
+tar_load(sim_lung_ncell1000_nclust5)
+tar_load(sim_lung_ncell1000_nclust7)
+tar_load(sim_lung_ncell3000_nclust3)
+tar_load(sim_lung_ncell3000_nclust5)
+tar_load(sim_lung_ncell3000_nclust7)
+tar_load(sim_lung_ncell5000_nclust3)
+tar_load(sim_lung_ncell5000_nclust5)
+tar_load(sim_lung_ncell5000_nclust7)
+tar_load(sim_lung_ncell10000_nclust3)
+tar_load(sim_lung_ncell10000_nclust5)
+tar_load(sim_lung_ncell10000_nclust7)
+```
+
+# Quality Control Plots
+
+We'll make a UMAP of the ground truth labels for each dataset to make sure our data look halfway realistic. 
+
+```{r, results='hide'}
+qc_plots <- purrr::map(ls()[grepl("sim_", ls())], function(w) {
+  seu <- eval(as.symbol(w))
+  p <- DimPlot(seu, 
+               group.by = "cellPopulation", 
+               cols = alpha(paletteer::paletteer_d("ggsci::nrc_npg"), alpha = 0.75), 
+               pt.size = 1.5) + 
+       labs(x = "UMAP 1", 
+            y = "UMAP 2",
+            title = w, 
+            color = "True Labels") + 
+       theme_classic(base_size = 14) + 
+       theme(axis.text = element_blank(), 
+             axis.ticks = element_blank(), 
+             plot.title = element_text(hjust = 0.5), 
+             plot.title.position = "panel") + 
+       guides(color = guide_legend(override.aes = list(alpha = 1, size = 3)))
+  return(p)
+})
+```
+
+Let's check out each plot. 
+
+```{r, results='hold'}
+for (p in qc_plots) {
+  print(p)
+}
+```
+
+# Session Info 
+
+```{r}
+sessioninfo::session_info()
+```
