@@ -204,5 +204,5 @@ list(
   
   ##### summary & analysis documents
   tar_render(simulation_qc, "./Reports/SCISSORS_Simulated_Data_QC.Rmd"), 
-  tar_render(simulation_summary, "./Reports/SCISSORS_Simulation_Summary.Rmd", cue = tar_cue(mode = "never"))
+  tar_render(simulation_summary, "./Reports/SCISSORS_Simulation_Summary.Rmd")
 )

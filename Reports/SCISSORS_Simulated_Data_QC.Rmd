@@ -74,8 +74,11 @@ qc_plots <- purrr::map(ls()[grepl("sim_", ls())], function(w) {
   seu <- eval(as.symbol(w))
   p <- DimPlot(seu, 
                group.by = "cellPopulation", 
-               cols = alpha(paletteer::paletteer_d("ggsci::nrc_npg"), alpha = 0.75), 
-               pt.size = 1.5) + 
+               cols = alpha(paletteer::paletteer_d("ggsci::nrc_npg"), alpha = 0.5), 
+               shuffle = TRUE, 
+               seed = 312, 
+               raster = FALSE,  
+               pt.size = 1) + 
        labs(x = "UMAP 1", 
             y = "UMAP 2",
             title = w, 

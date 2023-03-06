@@ -1,0 +1,98 @@
+/var/spool/slurmd/job1913768/slurm_script: line 4: module: command not found
+✔ skip target panc_ref
+✔ skip target sim_panc_ncell10000_nclust3
+✔ skip target sim_panc_ncell10000_nclust5
+✔ skip target lung_ref
+✔ skip target sim_panc_ncell10000_nclust7
+✔ skip target sim_lung_ncell5000_nclust3
+✔ skip target sim_lung_ncell5000_nclust5
+✔ skip target sim_lung_ncell3000_nclust3
+✔ skip target sim_lung_ncell5000_nclust7
+✔ skip target sim_lung_ncell3000_nclust5
+✔ skip target sim_lung_ncell1000_nclust3
+✔ skip target sim_lung_ncell3000_nclust7
+✔ skip target sim_lung_ncell1000_nclust5
+✔ skip target sim_lung_ncell10000_nclust3
+✔ skip target sim_lung_ncell1000_nclust7
+✔ skip target sim_lung_ncell10000_nclust5
+✔ skip target sim_panc_ncell5000_nclust3
+✔ skip target clustres_lung_ncell10000_nclust3
+✔ skip target sim_lung_ncell10000_nclust7
+✔ skip target sim_panc_ncell5000_nclust5
+✔ skip target sim_panc_ncell3000_nclust3
+✔ skip target clustres_lung_ncell10000_nclust5
+✔ skip target sim_panc_ncell1000_nclust3
+✔ skip target sim_panc_ncell5000_nclust7
+✔ skip target sim_panc_ncell3000_nclust5
+✔ skip target clustres_lung_ncell10000_nclust7
+✔ skip target sim_panc_ncell3000_nclust7
+✔ skip target sim_panc_ncell1000_nclust5
+✔ skip target sim_panc_ncell1000_nclust7
+✔ skip target clustres_lung_ncell3000_nclust3
+✔ skip target clustres_lung_ncell3000_nclust5
+✔ skip target clustres_lung_ncell1000_nclust3
+✔ skip target clustres_lung_ncell3000_nclust7
+✔ skip target clustres_lung_ncell1000_nclust5
+✔ skip target clustres_lung_ncell1000_nclust7
+✔ skip target clustres_lung_ncell5000_nclust3
+✔ skip target clustres_lung_ncell5000_nclust5
+✔ skip target clustres_lung_ncell5000_nclust7
+✔ skip target clustres_panc_ncell1000_nclust3
+✔ skip target clustres_panc_ncell1000_nclust5
+✔ skip target clustres_panc_ncell1000_nclust7
+✔ skip target clustres_panc_ncell10000_nclust3
+✔ skip target clustres_panc_ncell10000_nclust5
+✔ skip target clustres_panc_ncell10000_nclust7
+✔ skip target clustres_panc_ncell3000_nclust3
+✔ skip target clustres_panc_ncell3000_nclust5
+✔ skip target clustres_panc_ncell3000_nclust7
+✔ skip target clustres_panc_ncell5000_nclust3
+✔ skip target clustres_panc_ncell5000_nclust5
+✔ skip target clustres_panc_ncell5000_nclust7
+• start target simulation_summary
+
+Attaching package: 'patchwork'
+
+The following object is masked from 'package:MASS':
+
+    area
+
+[mcl] new tab created
+[mcl] pid 3343928
+ ite ---  chaos  time hom(avg,lo,hi) m-ie m-ex i-ex fmv
+  1  ...   0.23  0.00 0.91/0.86/0.94 0.90 0.90 0.90 100
+  2  ...   0.18  0.00 0.88/0.80/0.93 0.90 0.90 0.90 100
+  3  ...   0.16  0.00 0.96/0.95/0.96 0.90 0.90 0.90 100
+  4  ...   0.18  0.00 0.89/0.89/0.89 0.90 0.60 0.60 100
+  5  ...   0.25  0.00 0.78/0.78/0.78 0.86 0.86 0.60 100
+  6  ...   0.20  0.00 0.80/0.80/0.80 0.86 0.86 0.60 100
+  7  ...   0.05  0.00 0.95/0.95/0.95 0.86 0.86 0.60 100
+  8  ...   0.00  0.00 1.00/1.00/1.00 0.86 0.86 0.60 100
+  9  ...   0.00  0.00 1.00/1.00/1.00 0.86 0.43 0.30 100
+[mcl] jury pruning marks: <100,100,100>, out of 100
+[mcl] jury pruning synopsis: <100.0 or really really really good> (cf -scheme, -do log)
+[mcl] output is in tmp.mcl.out
+[mcl] 1 clusters found
+[mcl] output is in tmp.mcl.out
+
+Please cite:
+    Stijn van Dongen, Graph Clustering by Flow Simulation.  PhD thesis,
+    University of Utrecht, May 2000.
+       (  http://www.library.uu.nl/digiarchief/dip/diss/1895620/full.pdf
+       or  http://micans.org/mcl/lit/svdthesis.pdf.gz)
+OR
+    Stijn van Dongen, A cluster algorithm for graphs. Technical
+    Report INS-R0010, National Research Institute for Mathematics
+    and Computer Science in the Netherlands, Amsterdam, May 2000.
+       (  http://www.cwi.nl/ftp/CWIreports/INS/INS-R0010.ps.Z
+       or  http://micans.org/mcl/lit/INS-R0010.ps.Z)
+
+Read 1 item
+Quitting from lines 676-705 (SCISSORS_Simulation_Summary.Rmd) 
+✖ error target simulation_summary
+Error: object 'cellsius_clusts' not found
+
+• start target simulation_qc
+• built target simulation_qc [1.364 minutes]
+• end pipeline [5.745 minutes]
+There were 50 or more warnings (use warnings() to see the first 50)

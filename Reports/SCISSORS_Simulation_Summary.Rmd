@@ -40,34 +40,34 @@ Next we'll load in the clustering algorithm outputs from out `{targets}` pipelin
 
 ```{r}
 # pancreas reference 
-tar_load(clustres_panc_ncell1000_nclust3)
-tar_load(clustres_panc_ncell1000_nclust5)
-tar_load(clustres_panc_ncell1000_nclust7)
-tar_load(clustres_panc_ncell3000_nclust3)
-tar_load(clustres_panc_ncell3000_nclust5)
-tar_load(clustres_panc_ncell3000_nclust7)
-tar_load(clustres_panc_ncell5000_nclust3)
-tar_load(clustres_panc_ncell5000_nclust5)
-tar_load(clustres_panc_ncell5000_nclust7)
-tar_load(clustres_panc_ncell10000_nclust3)
-tar_load(clustres_panc_ncell10000_nclust5)
-tar_load(clustres_panc_ncell10000_nclust7)
+tar_load(clustres_panc_ncell1000_nclust3, store = "../_targets/")
+tar_load(clustres_panc_ncell1000_nclust5, store = "../_targets/")
+tar_load(clustres_panc_ncell1000_nclust7, store = "../_targets/")
+tar_load(clustres_panc_ncell3000_nclust3, store = "../_targets/")
+tar_load(clustres_panc_ncell3000_nclust5, store = "../_targets/")
+tar_load(clustres_panc_ncell3000_nclust7, store = "../_targets/")
+tar_load(clustres_panc_ncell5000_nclust3, store = "../_targets/")
+tar_load(clustres_panc_ncell5000_nclust5, store = "../_targets/")
+tar_load(clustres_panc_ncell5000_nclust7, store = "../_targets/")
+tar_load(clustres_panc_ncell10000_nclust3, store = "../_targets/")
+tar_load(clustres_panc_ncell10000_nclust5, store = "../_targets/")
+tar_load(clustres_panc_ncell10000_nclust7, store = "../_targets/")
 # lung reference
-tar_load(clustres_lung_ncell1000_nclust3)
-tar_load(clustres_lung_ncell1000_nclust5)
-tar_load(clustres_lung_ncell1000_nclust7)
-tar_load(clustres_lung_ncell3000_nclust3)
-tar_load(clustres_lung_ncell3000_nclust5)
-tar_load(clustres_lung_ncell3000_nclust7)
-tar_load(clustres_lung_ncell5000_nclust3)
-tar_load(clustres_lung_ncell5000_nclust5)
-tar_load(clustres_lung_ncell5000_nclust7)
-tar_load(clustres_lung_ncell10000_nclust3)
-tar_load(clustres_lung_ncell10000_nclust5)
-tar_load(clustres_lung_ncell10000_nclust7)
+tar_load(clustres_lung_ncell1000_nclust3, store = "../_targets/")
+tar_load(clustres_lung_ncell1000_nclust5, store = "../_targets/")
+tar_load(clustres_lung_ncell1000_nclust7, store = "../_targets/")
+tar_load(clustres_lung_ncell3000_nclust3, store = "../_targets/")
+tar_load(clustres_lung_ncell3000_nclust5, store = "../_targets/")
+tar_load(clustres_lung_ncell3000_nclust7, store = "../_targets/")
+tar_load(clustres_lung_ncell5000_nclust3, store = "../_targets/")
+tar_load(clustres_lung_ncell5000_nclust5, store = "../_targets/")
+tar_load(clustres_lung_ncell5000_nclust7, store = "../_targets/")
+tar_load(clustres_lung_ncell10000_nclust3, store = "../_targets/")
+tar_load(clustres_lung_ncell10000_nclust5, store = "../_targets/")
+tar_load(clustres_lung_ncell10000_nclust7, store = "../_targets/")
 ```
 
-Next we'll coerce everything into one big dataframe. We're not going to include the Leiden clustering results this time as they're nearly identical to the Louvain results. 
+Next we'll coerce everything into one big data.frame. We're not going to include the Leiden clustering results this time as they're nearly identical to the Louvain results. 
 
 ```{r}
 sim_results <- purrr::map(ls()[grepl("clustres", ls())], 
@@ -79,21 +79,19 @@ sim_results <- purrr::map(ls()[grepl("clustres", ls())],
                             return(df)
                           }) %>% 
                purrr::reduce(rbind) %>% 
-               filter(method != "Leiden (Seurat)") %>% 
-               mutate(method = factor(method, 
-                                      levels = c("K-means (Hartigan-Wong)", 
-                                                 "Hierarchical (Ward)", 
-                                                 "Louvain (Seurat)", 
-                                                 "DBSCAN", 
-                                                 "GiniClust3", 
-                                                 "CellSIUS", 
-                                                 "SCISSORS"), 
-                                      labels = c("K-means", 
+               mutate(method = case_when(method == "Louvain (Seurat)" ~ "Seurat", 
+                                         method == "Leiden (Seurat)" ~ "Leiden", 
+                                         method == "K-means (Hartigan-Wong)" ~ "K-means", 
+                                         method == "Hierarchical (Ward)" ~ "Hierarchical", 
+                                         TRUE ~ method), 
+                      method = factor(method, 
+                                      levels = c("K-means", 
                                                  "Hierarchical", 
-                                                 "Louvain (Seurat)", 
                                                  "DBSCAN", 
+                                                 "Leiden", 
                                                  "GiniClust3", 
                                                  "CellSIUS", 
+                                                 "Seurat", 
                                                  "SCISSORS")), 
                       runtime_minutes = case_when(runtime_units == "secs" ~ runtime / 60, 
                                                   runtime_units == "mins" ~ runtime, 
@@ -101,20 +99,34 @@ sim_results <- purrr::map(ls()[grepl("clustres", ls())],
                                                   TRUE ~ NA_real_))
 ```
 
+We'll also create a sub-table of just the various parameter values we tested for each method.
+
+```{r}
+param_table <- select(sim_results, 
+                      method, 
+                      parameter_type, 
+                      parameter) %>% 
+               distinct() %>% 
+               arrange(method, 
+                       parameter_type, 
+                       parameter)
+```
+
 # Analysis 
 
-## Classification Error
+## Classification Accuracy
 
 First we'll look at the distribution of ARI values achieved by each method over the entire parameter space. We note that this includes parameter values that are less than optimal for some methods, but this is somewhat realistic as it can be very difficult to obtain parameter optimality without ground truth labels for your data. In practice sub-optimal parameters are often chosen due to reliance on software defaults, researcher inexperience, computational expediency, or stochasticity in methods / analysis. 
 
-```{r, fig.width=10}
+```{r, fig.width=12, fig.height=6}
 p0a <- ggplot(sim_results, aes(x = method, y = ari, fill = method)) + 
        facet_wrap(~reference) + 
        geom_violin(draw_quantiles = 0.5, 
                    color = "black", 
                    scale = "width", 
                    size = 1) + 
-       ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Louvain (Seurat)"), 
+       ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Seurat"), 
+                                                c("SCISSORS", "Leiden"), 
                                                 c("SCISSORS", "DBSCAN"), 
                                                 c("SCISSORS", "GiniClust3"), 
                                                 c("SCISSORS", "CellSIUS"), 
@@ -127,24 +139,26 @@ p0a <- ggplot(sim_results, aes(x = method, y = ari, fill = method)) +
                              textsize = 3) + 
        labs(fill = "Clustering Method", y = "Adjusted Rand Index") + 
        scale_y_continuous(labels = scales::label_percent(), 
-                          breaks = seq(0, 1, by = 0.25)) + 
+                          breaks = seq(round(min(sim_results$ari)), round(max(sim_results$ari)), by = 0.25)) + 
        scale_fill_paletteer_d("ggsci::nrc_npg") + 
-       theme_classic(base_size = 14)  + 
-       theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.9), 
+       theme_classic(base_size = 16)  + 
+       theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.95, face = "bold"), 
              axis.title.x = element_blank(), 
-             panel.grid.major.y = element_line())
+             panel.grid.major.y = element_line(color = "grey80")) + 
+       guides(fill = guide_legend(override.aes = list(size = 1, color = NULL)))
 p0a
 ```
 
 We can make the same plot for overall performance, without splitting by reference dataset. 
 
-```{r, fig.width=10}
+```{r, fig.width=8, fig.height=5}
 p0b <- ggplot(sim_results, aes(x = method, y = ari, fill = method)) + 
        geom_violin(draw_quantiles = 0.5, 
                    color = "black", 
                    scale = "width", 
                    size = 1) + 
-       ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Louvain (Seurat)"), 
+       ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Seurat"), 
+                                                c("SCISSORS", "Leiden"), 
                                                 c("SCISSORS", "DBSCAN"), 
                                                 c("SCISSORS", "GiniClust3"), 
                                                 c("SCISSORS", "CellSIUS"), 
@@ -157,26 +171,27 @@ p0b <- ggplot(sim_results, aes(x = method, y = ari, fill = method)) +
                              textsize = 3) + 
        labs(fill = "Clustering Method", y = "Adjusted Rand Index") + 
        scale_y_continuous(labels = scales::label_percent(), 
-                          breaks = seq(0, 1, by = 0.25)) + 
+                          breaks = seq(round(min(sim_results$ari)), round(max(sim_results$ari)), by = 0.25)) + 
        scale_fill_paletteer_d("ggsci::nrc_npg") + 
-       theme_classic(base_size = 14)  + 
-       theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.9), 
+       theme_classic(base_size = 16)  + 
+       theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.95, face = "bold"), 
              axis.title.x = element_blank(), 
-             panel.grid.major.y = element_line())
+             panel.grid.major.y = element_line(color = "grey80")) + 
+       guides(fill = guide_legend(override.aes = list(size = 1, color = NULL)))
 p0b
 ```
 
-
 We'll repeat the plot for the normalized mutual information. 
 
-```{r, fig.width=10}
+```{r, fig.width=12, fig.height=6}
 p1a <- ggplot(sim_results, aes(x = method, y = nmi, fill = method)) + 
        facet_wrap(~reference) + 
        geom_violin(draw_quantiles = 0.5, 
                    color = "black", 
                    scale = "width", 
                    size = 1) + 
-       ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Louvain (Seurat)"), 
+       ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Seurat"), 
+                                                c("SCISSORS", "Leiden"), 
                                                 c("SCISSORS", "DBSCAN"), 
                                                 c("SCISSORS", "GiniClust3"), 
                                                 c("SCISSORS", "CellSIUS"), 
@@ -189,24 +204,26 @@ p1a <- ggplot(sim_results, aes(x = method, y = nmi, fill = method)) +
                              textsize = 3) + 
        labs(fill = "Clustering Method", y = "Normalized Mutual Information") + 
        scale_y_continuous(labels = scales::label_percent(), 
-                          breaks = seq(0, 1, by = 0.25)) + 
+                          breaks = seq(round(min(sim_results$nmi)), round(max(sim_results$nmi)), by = 0.25)) + 
        scale_fill_paletteer_d("ggsci::nrc_npg") + 
-       theme_classic(base_size = 14)  + 
-       theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.9), 
+       theme_classic(base_size = 16)  + 
+       theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.95, face = "bold"), 
              axis.title.x = element_blank(), 
-             panel.grid.major.y = element_line())
+             panel.grid.major.y = element_line(color = "grey80")) + 
+       guides(fill = guide_legend(override.aes = list(size = 1, color = NULL)))
 p1a
 ```
 
 Again, the entire dataset without splitting by reference. 
 
-```{r, fig.width=10}
+```{r, fig.width=8, fig.height=5}
 p1b <- ggplot(sim_results, aes(x = method, y = nmi, fill = method)) + 
        geom_violin(draw_quantiles = 0.5, 
                    color = "black", 
                    scale = "width", 
                    size = 1) + 
-       ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Louvain (Seurat)"), 
+       ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Seurat"), 
+                                                c("SCISSORS", "Leiden"), 
                                                 c("SCISSORS", "DBSCAN"), 
                                                 c("SCISSORS", "GiniClust3"), 
                                                 c("SCISSORS", "CellSIUS"), 
@@ -219,25 +236,27 @@ p1b <- ggplot(sim_results, aes(x = method, y = nmi, fill = method)) +
                              textsize = 3) + 
        labs(fill = "Clustering Method", y = "Normalized Mutual Information") + 
        scale_y_continuous(labels = scales::label_percent(), 
-                          breaks = seq(0, 1, by = 0.25)) + 
+                          breaks = seq(round(min(sim_results$nmi)), round(max(sim_results$nmi)), by = 0.25)) + 
        scale_fill_paletteer_d("ggsci::nrc_npg") + 
-       theme_classic(base_size = 14)  + 
-       theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.9), 
+       theme_classic(base_size = 16)  + 
+       theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.95, face = "bold"), 
              axis.title.x = element_blank(), 
-             panel.grid.major.y = element_line())
+             panel.grid.major.y = element_line(color = "grey80")) + 
+       guides(fill = guide_legend(override.aes = list(size = 1, color = NULL)))
 p1b
 ```
 
-Next, the Davies-Bouldin index:
+Next, the Davies-Bouldin index (lower is better in this case):
 
-```{r, fig.width=10}
+```{r, fig.width=12, fig.height=6}
 p2a <- ggplot(sim_results, aes(x = method, y = db, fill = method)) + 
        facet_wrap(~reference) + 
        geom_violin(draw_quantiles = 0.5, 
                    color = "black", 
                    scale = "width", 
                    size = 1) + 
-       ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Louvain (Seurat)"), 
+       ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Seurat"), 
+                                                c("SCISSORS", "Leiden"), 
                                                 c("SCISSORS", "DBSCAN"), 
                                                 c("SCISSORS", "GiniClust3"), 
                                                 c("SCISSORS", "CellSIUS"), 
@@ -249,25 +268,27 @@ p2a <- ggplot(sim_results, aes(x = method, y = db, fill = method)) +
                              vjust = 0.2,
                              textsize = 3) + 
        labs(fill = "Clustering Method", y = "Davies-Bouldin Index") + 
-       scale_y_continuous(labels = scales::label_number(accuracy = 0.1), 
-                          breaks = seq(0, round(max(sim_results$db)), by = 0.25)) + 
+       scale_y_continuous(labels = scales::label_number(accuracy = 1), 
+                          breaks = seq(round(min(sim_results$db)), round(max(sim_results$db)), by = 1)) + 
        scale_fill_paletteer_d("ggsci::nrc_npg") + 
-       theme_classic(base_size = 14)  + 
-       theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.9), 
+       theme_classic(base_size = 16)  + 
+       theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.95, face = "bold"), 
              axis.title.x = element_blank(), 
-             panel.grid.major.y = element_line())
+             panel.grid.major.y = element_line(color = "grey80")) + 
+       guides(fill = guide_legend(override.aes = list(size = 1, color = NULL)))
 p2a
 ```
 
 Again, the entire dataset without splitting by reference. 
 
-```{r, fig.width=10}
+```{r, fig.width=8, fig.height=5}
 p2b <- ggplot(sim_results, aes(x = method, y = db, fill = method)) + 
        geom_violin(draw_quantiles = 0.5, 
                    color = "black", 
                    scale = "width", 
                    size = 1) + 
-       ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Louvain (Seurat)"), 
+       ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Seurat"), 
+                                                c("SCISSORS", "Leiden"), 
                                                 c("SCISSORS", "DBSCAN"), 
                                                 c("SCISSORS", "GiniClust3"), 
                                                 c("SCISSORS", "CellSIUS"), 
@@ -279,26 +300,28 @@ p2b <- ggplot(sim_results, aes(x = method, y = db, fill = method)) +
                              vjust = 0.2,
                              textsize = 3) + 
        labs(fill = "Clustering Method", y = "Davies-Bouldin Index") + 
-       scale_y_continuous(labels = scales::label_number(accuracy = 0.1), 
-                          breaks = seq(0, round(max(sim_results$db)), by = 0.25)) + 
+       scale_y_continuous(labels = scales::label_number(accuracy = 1), 
+                          breaks = seq(round(min(sim_results$db)), round(max(sim_results$db)), by = 1)) + 
        scale_fill_paletteer_d("ggsci::nrc_npg") + 
-       theme_classic(base_size = 14)  + 
-       theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.9), 
+       theme_classic(base_size = 16)  + 
+       theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.95, face = "bold"), 
              axis.title.x = element_blank(), 
-             panel.grid.major.y = element_line())
+             panel.grid.major.y = element_line(color = "grey80")) + 
+       guides(fill = guide_legend(override.aes = list(size = 1, color = NULL)))
 p2b
 ```
 
 And lastly for the mean silhouette score. 
 
-```{r, fig.width=10}
+```{r, fig.width=12, fig.height=6}
 p3a <- ggplot(sim_results, aes(x = method, y = sil, fill = method)) + 
        facet_wrap(~reference) + 
        geom_violin(draw_quantiles = 0.5, 
                    color = "black", 
                    scale = "width", 
                    size = 1) + 
-       ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Louvain (Seurat)"), 
+       ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Seurat"), 
+                                                c("SCISSORS", "Leiden"), 
                                                 c("SCISSORS", "DBSCAN"), 
                                                 c("SCISSORS", "GiniClust3"), 
                                                 c("SCISSORS", "CellSIUS"), 
@@ -311,24 +334,26 @@ p3a <- ggplot(sim_results, aes(x = method, y = sil, fill = method)) +
                              textsize = 3) + 
        labs(fill = "Clustering Method", y = "Mean Silhouette Score") + 
        scale_y_continuous(labels = scales::label_number(accuracy = .1), 
-                          breaks = seq(round(min(sim_results$sil)), 1, by = 0.25)) + 
+                          breaks = seq(round(min(sim_results$sil, 1)), round(max(sim_results$sil), 1), by = 0.3)) + 
        scale_fill_paletteer_d("ggsci::nrc_npg") + 
-       theme_classic(base_size = 14)  + 
-       theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.9), 
+       theme_classic(base_size = 16)  + 
+       theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.95, face = "bold"), 
              axis.title.x = element_blank(), 
-             panel.grid.major.y = element_line())
+             panel.grid.major.y = element_line(color = "grey80")) + 
+       guides(fill = guide_legend(override.aes = list(size = 1, color = NULL)))
 p3a
 ```
 
 Without splitting by reference:
 
-```{r, fig.width=10}
+```{r, fig.width=8, fig.height=5}
 p3b <- ggplot(sim_results, aes(x = method, y = sil, fill = method)) + 
        geom_violin(draw_quantiles = 0.5, 
                    color = "black", 
                    scale = "width", 
                    size = 1) + 
-       ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Louvain (Seurat)"), 
+       ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Seurat"), 
+                                                c("SCISSORS", "Leiden"), 
                                                 c("SCISSORS", "DBSCAN"), 
                                                 c("SCISSORS", "GiniClust3"), 
                                                 c("SCISSORS", "CellSIUS"), 
@@ -341,18 +366,19 @@ p3b <- ggplot(sim_results, aes(x = method, y = sil, fill = method)) +
                              textsize = 3) + 
        labs(fill = "Clustering Method", y = "Mean Silhouette Score") + 
        scale_y_continuous(labels = scales::label_number(accuracy = .1), 
-                          breaks = seq(round(min(sim_results$sil)), 1, by = 0.25)) + 
+                          breaks = seq(round(min(sim_results$sil, 1)), round(max(sim_results$sil), 1), by = 0.3)) + 
        scale_fill_paletteer_d("ggsci::nrc_npg") + 
-       theme_classic(base_size = 14)  + 
-       theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.9), 
+       theme_classic(base_size = 16)  + 
+       theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.95, face = "bold"), 
              axis.title.x = element_blank(), 
-             panel.grid.major.y = element_line())
+             panel.grid.major.y = element_line(color = "grey80")) + 
+       guides(fill = guide_legend(override.aes = list(size = 1, color = NULL)))
 p3b
 ```
 
 Next we'll subset the data to only include ARI values above the median for each method, which we are doing in order to mimic reasonable parameter selection by experienced researchers. 
 
-```{r, fig.width=10}
+```{r, fig.width=12, fig.height=6}
 p4 <- sim_results %>% 
       with_groups(c(reference, method), 
                   filter, 
@@ -363,7 +389,8 @@ p4 <- sim_results %>%
                   color = "black", 
                   scale = "width", 
                   size = 1) + 
-      ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Louvain (Seurat)"), 
+      ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Seurat"), 
+                                               c("SCISSORS", "Leiden"), 
                                                c("SCISSORS", "DBSCAN"), 
                                                c("SCISSORS", "GiniClust3"), 
                                                c("SCISSORS", "CellSIUS"), 
@@ -380,17 +407,18 @@ p4 <- sim_results %>%
       scale_y_continuous(labels = scales::label_percent(), 
                          breaks = seq(0, 1, by = 0.25)) + 
       scale_fill_paletteer_d("ggsci::nrc_npg") + 
-      theme_classic(base_size = 14)  + 
-      theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.9), 
+      theme_classic(base_size = 16)  + 
+      theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.95, face = "bold"), 
             axis.title.x = element_blank(), 
-            panel.grid.major.y = element_line(), 
-            plot.caption = element_text(face = "italic"))
+            panel.grid.major.y = element_line(color = "grey80"), 
+            plot.caption = element_text(face = "italic")) + 
+      guides(fill = guide_legend(override.aes = list(size = 1, color = NULL)))
 p4
 ```
 
 We'll repeat the filtered plot for the NMI of each method.
 
-```{r, fig.width=10}
+```{r, fig.width=12, fig.height=6}
 p5 <- sim_results %>% 
       with_groups(c(reference, method), 
                   filter, 
@@ -401,7 +429,8 @@ p5 <- sim_results %>%
                   color = "black", 
                   scale = "width", 
                   size = 1) + 
-      ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Louvain (Seurat)"), 
+      ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Seurat"), 
+                                               c("SCISSORS", "Leiden"), 
                                                c("SCISSORS", "DBSCAN"), 
                                                c("SCISSORS", "GiniClust3"), 
                                                c("SCISSORS", "CellSIUS"), 
@@ -418,28 +447,30 @@ p5 <- sim_results %>%
       scale_y_continuous(labels = scales::label_percent(), 
                          breaks = seq(0, 1, by = 0.25)) + 
       scale_fill_paletteer_d("ggsci::nrc_npg") + 
-      theme_classic(base_size = 14)  + 
-      theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.9), 
+      theme_classic(base_size = 16)  + 
+      theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.95, face = "bold"), 
             axis.title.x = element_blank(), 
-            panel.grid.major.y = element_line(), 
-            plot.caption = element_text(face = "italic"))
+            panel.grid.major.y = element_line(color = "grey80"), 
+            plot.caption = element_text(face = "italic")) + 
+      guides(fill = guide_legend(override.aes = list(size = 1, color = NULL)))
 p5
 ```
 
 And the Davies-Bouldin index:
 
-```{r, fig.width=10}
+```{r, fig.width=12, fig.height=6}
 p6 <- sim_results %>% 
       with_groups(c(reference, method), 
                   filter, 
-                  db > median(db)) %>% 
+                  db < median(db)) %>% 
       ggplot(aes(x = method, y = db, fill = method)) + 
       facet_wrap(~reference) + 
       geom_violin(draw_quantiles = 0.5, 
                   color = "black", 
                   scale = "width", 
                   size = 1) + 
-      ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Louvain (Seurat)"), 
+      ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Seurat"), 
+                                               c("SCISSORS", "Leiden"), 
                                                c("SCISSORS", "DBSCAN"), 
                                                c("SCISSORS", "GiniClust3"), 
                                                c("SCISSORS", "CellSIUS"), 
@@ -454,19 +485,20 @@ p6 <- sim_results %>%
            y = "Davies-Bouldin Index", 
            caption = "Top 50% of clustering runs") + 
       scale_y_continuous(labels = scales::label_number(accuracy = 0.1), 
-                         breaks = seq(0, round(max(sim_results$db)), by = 0.25)) + 
+                         breaks = seq(0, 1.6, by = 0.4)) + 
       scale_fill_paletteer_d("ggsci::nrc_npg") + 
-      theme_classic(base_size = 14)  + 
-      theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.9), 
+      theme_classic(base_size = 16)  + 
+      theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.95, face = "bold"), 
             axis.title.x = element_blank(), 
-            panel.grid.major.y = element_line(), 
-            plot.caption = element_text(face = "italic"))
+            panel.grid.major.y = element_line(color = "grey80"), 
+            plot.caption = element_text(face = "italic")) + 
+      guides(fill = guide_legend(override.aes = list(size = 1, color = NULL)))
 p6
 ```
 
 As well as for the silhouette score. 
 
-```{r, fig.width=10}
+```{r, fig.width=12, fig.height=6}
 p7 <- sim_results %>% 
       with_groups(c(reference, method), 
                   filter, 
@@ -477,7 +509,8 @@ p7 <- sim_results %>%
                   color = "black", 
                   scale = "width", 
                   size = 1) + 
-      ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Louvain (Seurat)"), 
+      ggsignif::geom_signif(comparisons = list(c("SCISSORS", "Seurat"), 
+                                               c("SCISSORS", "Leiden"), 
                                                c("SCISSORS", "DBSCAN"), 
                                                c("SCISSORS", "GiniClust3"), 
                                                c("SCISSORS", "CellSIUS"), 
@@ -492,13 +525,14 @@ p7 <- sim_results %>%
            y = "Silhouette Score", 
            caption = "Top 50% of clustering runs") + 
       scale_y_continuous(labels = scales::label_number(accuracy = .1), 
-                          breaks = seq(round(min(sim_results$sil)), 1, by = 0.25)) + 
+                          breaks = seq(0, max(sim_results$sil), by = 0.25)) + 
       scale_fill_paletteer_d("ggsci::nrc_npg") + 
-      theme_classic(base_size = 14)  + 
-      theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.9), 
+      theme_classic(base_size = 16)  + 
+      theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.95, face = "bold"), 
             axis.title.x = element_blank(), 
-            panel.grid.major.y = element_line(), 
-            plot.caption = element_text(face = "italic"))
+            panel.grid.major.y = element_line(color = "grey80"), 
+            plot.caption = element_text(face = "italic")) + 
+      guides(fill = guide_legend(override.aes = list(size = 1, color = NULL)))
 p7
 ```
 
@@ -507,21 +541,22 @@ p7
 We can also plot an example of how the various methods categorize an example dataset. We'll need to run each method individually, using the same code that we did in our `{targets}` pipeline. First we'll load in a simulated dataset from the pancreas reference with 5,000 cells and 7 clusters. 
 
 ```{r}
-tar_load(sim_panc_ncell1000_nclust7)
+tar_load(sim_panc_ncell1000_nclust7, store = "../_targets/")
 ```
 
 Here's what the ground truth labels from our simulations look like. Some of the clusters are easily separable, and some others are less so. 
 
-```{r, fig.width=8}
+```{r, fig.width=6.2, fig.height=5}
 sim_panc_ncell1000_nclust7@meta.data$cellPopulation2 <- as.integer(sim_panc_ncell1000_nclust7@meta.data$cellPopulation) - 1L
 p8 <- DimPlot(sim_panc_ncell1000_nclust7, 
               reduction = "tsne", 
               group.by = "cellPopulation2", 
-              cols = alpha(paletteer_d("ggsci::category10_d3"), 0.75)) + 
+              cols = alpha(paletteer_d("ggsci::category10_d3"), 0.75), 
+              pt.size = 1) + 
       labs(x = "t-SNE 1", 
            y = "t-SNE 2",  
            color = "True\nLabel") + 
-      theme_classic(base_size = 14) + 
+      theme_classic(base_size = 16) + 
       theme(axis.ticks = element_blank(), 
             axis.text = element_blank(), 
             plot.title = element_blank(), 
@@ -650,31 +685,31 @@ We now bring the clustering results back into R.
 giniclust3_clusts <- as.integer(py$consensusCluster$finalCluster)
 ```
 
-Lastly, we'll run CellSIUS. We first generate a broad clustering, then subcluster using MCL. 
+Lastly, we'll run CellSIUS. We first generate a broad clustering, then subcluster using MCL. We use the default setting for the `min_fc` parameter. 
 
-```{r}
+```{r, results='hide', message=FALSE, warning=FALSE}
 seu.obj <- FindClusters(sim_panc_ncell1000_nclust7, 
                         resolution = 0.1, 
                         algorithm = 1, 
                         verbose = FALSE, 
                         random.seed = 312)
-cellsius_res <- CellSIUS::CellSIUS(mat.norm = as.matrix(sim_panc_ncell1000_nclust7@assays$RNA@data),
-                                   min_fc = 0.5, 
-                                   group_id = as.factor(sim_panc_ncell1000_nclust7$seurat_clusters), 
+cellsius_res <- CellSIUS::CellSIUS(mat.norm = as.matrix(seu.obj@assays$RNA@data),
+                                   min_fc = 2, 
+                                   group_id = as.factor(seu.obj$seurat_clusters), 
                                    mcl_path = "/nas/longleaf/rhel8/apps/mcl/14-137/bin/mcl")
 if (all(is.na(cellsius_res))) {
-  cellsius_clust <- sim_panc_ncell1000_nclust7$seurat_clusters
+  cellsius_clusts <- as.integer(seu.obj$seurat_clusters) - 1L
 } else {
-  cellsius_clust <- CellSIUS::CellSIUS_final_cluster_assignment(cellsius_res, group_id = sim_panc_ncell1000_nclust7$seurat_clusters)
-  cellsius_clust <- as.factor(cellsius_clust)
+  cellsius_clusts <- CellSIUS::CellSIUS_final_cluster_assignment(cellsius_res, group_id = seu.obj$seurat_clusters)
+  cellsius_clusts <- as.integer(as.factor(cellsius_clusts)) - 1L
 }
 ```
 
 Now let's bring all our value together & plot them. 
 
-```{r, fig.width=13}
+```{r, fig.width=12, fig.height=5.75}
 clust_comp <- data.frame(SCISSORS = SCISSORS_clusts, 
-                         Louvain = Louvain_clusts, 
+                         Seurat = Louvain_clusts, 
                          Leiden = Leiden_clusts, 
                          Kmeans = kmeans_clusts, 
                          Hierarchical = hclust_clusts, 
@@ -686,8 +721,24 @@ clust_comp <- data.frame(SCISSORS = SCISSORS_clusts,
               tidyr::pivot_longer(!contains("tSNE"), 
                                   names_to = "method", 
                                   values_to = "cluster") %>% 
-              mutate(across(!contains("tSNE"), as.factor)) %>% 
-              filter(method != "Leiden")
+              mutate(method = factor(method, 
+                                     levels = c("Kmeans", 
+                                                "Hierarchical", 
+                                                "DBSCAN", 
+                                                "Leiden", 
+                                                "GiniClust3", 
+                                                "CellSIUS", 
+                                                "Seurat", 
+                                                "SCISSORS"), 
+                                      labels = c("K-means", 
+                                                 "Hierarchical", 
+                                                 "DBSCAN", 
+                                                 "Leiden", 
+                                                 "GiniClust3", 
+                                                 "CellSIUS", 
+                                                 "Seurat", 
+                                                 "SCISSORS")), 
+                     across(!contains("tSNE"), as.factor))
 p9 <- ggplot(clust_comp, aes(x = tSNE_1, y = tSNE_2, color = cluster)) + 
       facet_wrap(~method, ncol = 4) + 
       geom_point(size = 0.75, alpha = 0.75) + 
@@ -695,7 +746,7 @@ p9 <- ggplot(clust_comp, aes(x = tSNE_1, y = tSNE_2, color = cluster)) +
       labs(x = "t-SNE 1", 
            y = "t-SNE 2",  
            color = "Estimated\nCluster") + 
-      theme_classic(base_size = 14) + 
+      theme_classic(base_size = 16) + 
       theme(axis.ticks = element_blank(), 
             axis.text = element_blank(), 
             plot.title = element_blank(), 
@@ -713,46 +764,55 @@ ari_res <- data.frame(ARI = c(mclust::adjustedRandIndex(sim_panc_ncell1000_nclus
                               mclust::adjustedRandIndex(sim_panc_ncell1000_nclust7$cellPopulation, hclust_clusts), 
                               mclust::adjustedRandIndex(sim_panc_ncell1000_nclust7$cellPopulation, dbscan_clusts), 
                               mclust::adjustedRandIndex(sim_panc_ncell1000_nclust7$cellPopulation, giniclust3_clusts), 
-                              mclust::adjustedRandIndex(sim_panc_ncell1000_nclust7$cellPopulation, cellsius_clusts)), 
-                      Method = c("SCISSORS", "Louvain", "K-means", "Hierarchical", "DBSCAN", "GiniClust3", "CellSIUS")) %>% 
+                              mclust::adjustedRandIndex(sim_panc_ncell1000_nclust7$cellPopulation, cellsius_clusts), 
+                              mclust::adjustedRandIndex(sim_panc_ncell1000_nclust7$cellPopulation, Leiden_clusts)), 
+                      Method = c("SCISSORS", "Seurat", "K-means", "Hierarchical", "DBSCAN", "GiniClust3", "CellSIUS", "Leiden")) %>% 
            arrange(desc(ARI)) %>% 
            mutate(ARI_Rank = row_number(), 
                   across(where(is.numeric), \(x) round(x, 3))) %>% 
            select(Method, contains("ARI"))
+ari_res_fmt <- mutate(ari_res, ARI_Val_Rank = paste0(ARI, " (", ARI_Rank, ")")) %>% 
+               select(Method, ARI_Val_Rank)
 nmi_res <- data.frame(NMI = c(aricode::NMI(sim_panc_ncell1000_nclust7$cellPopulation, SCISSORS_clusts), 
                               aricode::NMI(sim_panc_ncell1000_nclust7$cellPopulation, Louvain_clusts), 
                               aricode::NMI(sim_panc_ncell1000_nclust7$cellPopulation, kmeans_clusts), 
                               aricode::NMI(sim_panc_ncell1000_nclust7$cellPopulation, hclust_clusts), 
                               aricode::NMI(sim_panc_ncell1000_nclust7$cellPopulation, dbscan_clusts), 
                               aricode::NMI(sim_panc_ncell1000_nclust7$cellPopulation, giniclust3_clusts), 
-                              aricode::NMI(sim_panc_ncell1000_nclust7$cellPopulation, cellsius_clusts)), 
-                      Method = c("SCISSORS", "Louvain", "K-means", "Hierarchical", "DBSCAN", "GiniClust3", "CellSIUS")) %>% 
+                              aricode::NMI(sim_panc_ncell1000_nclust7$cellPopulation, cellsius_clusts), 
+                              aricode::NMI(sim_panc_ncell1000_nclust7$cellPopulation, Leiden_clusts)), 
+                      Method = c("SCISSORS", "Seurat", "K-means", "Hierarchical", "DBSCAN", "GiniClust3", "CellSIUS", "Leiden")) %>% 
            arrange(desc(NMI)) %>% 
            mutate(NMI_Rank = row_number(), 
                   across(where(is.numeric), \(x) round(x, 3))) %>% 
            select(Method, contains("NMI"))
+nmi_res_fmt <- mutate(nmi_res, NMI_Val_Rank = paste0(NMI, " (", NMI_Rank, ")")) %>% 
+               select(Method, NMI_Val_Rank)
 sil_res <- data.frame(Sil = c(mean(cluster::silhouette(SCISSORS::CosineDist(Embeddings(sim_panc_ncell1000_nclust7, "pca")[, 1:20]), x = SCISSORS_clusts)[, 3]), 
                               mean(cluster::silhouette(SCISSORS::CosineDist(Embeddings(sim_panc_ncell1000_nclust7, "pca")[, 1:20]), x = Louvain_clusts)[, 3]), 
                               mean(cluster::silhouette(SCISSORS::CosineDist(Embeddings(sim_panc_ncell1000_nclust7, "pca")[, 1:20]), x = kmeans_clusts)[, 3]), 
                               mean(cluster::silhouette(SCISSORS::CosineDist(Embeddings(sim_panc_ncell1000_nclust7, "pca")[, 1:20]), x = hclust_clusts)[, 3]), 
                               mean(cluster::silhouette(SCISSORS::CosineDist(Embeddings(sim_panc_ncell1000_nclust7, "pca")[, 1:20]), x = dbscan_clusts)[, 3]), 
                               mean(cluster::silhouette(SCISSORS::CosineDist(Embeddings(sim_panc_ncell1000_nclust7, "pca")[, 1:20]), x = giniclust3_clusts)[, 3]), 
-                              mean(cluster::silhouette(SCISSORS::CosineDist(Embeddings(sim_panc_ncell1000_nclust7, "pca")[, 1:20]), x = as.integer(cellsius_clusts))[, 3])), 
-                      Method = c("SCISSORS", "Louvain", "K-means", "Hierarchical", "DBSCAN", "GiniClust3", "CellSIUS")) %>% 
+                              mean(cluster::silhouette(SCISSORS::CosineDist(Embeddings(sim_panc_ncell1000_nclust7, "pca")[, 1:20]), x = cellsius_clusts)[, 3]), 
+                              mean(cluster::silhouette(SCISSORS::CosineDist(Embeddings(sim_panc_ncell1000_nclust7, "pca")[, 1:20]), x = Leiden_clusts)[, 3])), 
+                      Method = c("SCISSORS", "Seurat", "K-means", "Hierarchical", "DBSCAN", "GiniClust3", "CellSIUS", "Leiden")) %>% 
            arrange(desc(Sil)) %>% 
            mutate(Sil_Rank = row_number(), 
                   across(where(is.numeric), \(x) round(x, 3))) %>% 
            select(Method, contains("Sil"))
-ari_table <- gridExtra::tableGrob(ari_res,
-                                  cols = c("Method", "Adj. Rand Index", "Rank"), 
+sil_res_fmt <- mutate(sil_res, Sil_Val_Rank = paste0(Sil, " (", Sil_Rank, ")")) %>% 
+               select(Method, Sil_Val_Rank)
+ari_table <- gridExtra::tableGrob(ari_res_fmt,
+                                  cols = c("Method", "ARI (Rank)"), 
                                   theme = gridExtra::ttheme_minimal(colhead = list(bg_params = list(fill = "grey90"))), 
                                   rows = NULL)
-nmi_table <- gridExtra::tableGrob(nmi_res,
-                                  cols = c("Method", "Norm. M.I.", "Rank"), 
+nmi_table <- gridExtra::tableGrob(nmi_res_fmt,
+                                  cols = c("Method", "NMI (Rank)"), 
                                   theme = gridExtra::ttheme_minimal(colhead = list(bg_params = list(fill = "grey90"))), 
                                   rows = NULL)
-sil_table <- gridExtra::tableGrob(sil_res,
-                                  cols = c("Method", "Mean Sil. Score", "Rank"), 
+sil_table <- gridExtra::tableGrob(sil_res_fmt,
+                                  cols = c("Method", "Mean Silhouette (Rank)"), 
                                   theme = gridExtra::ttheme_minimal(colhead = list(bg_params = list(fill = "grey90"))), 
                                   rows = NULL)
 metric_res <- ari_res %>% 
@@ -760,26 +820,26 @@ metric_res <- ari_res %>%
               inner_join(sil_res, by = "Method") %>% 
               mutate(Combined_Rank = ARI_Rank + NMI_Rank + Sil_Rank) %>% 
               arrange(Combined_Rank) %>% 
-              mutate(Rank = row_number()) %>% 
+              mutate(Rank = row_number(), 
+                     ARI_Val_Rank = paste0(ARI, " (", ARI_Rank, ")"), 
+                     NMI_Val_Rank = paste0(NMI, " (", NMI_Rank, ")"), 
+                     Sil_Val_Rank = paste0(Sil, " (", Sil_Rank, ")")) %>% 
               select(Method, 
-                     ARI, 
-                     ARI_Rank, 
-                     NMI, 
-                     NMI_Rank, 
-                     Sil, 
-                     Sil_Rank, 
+                     ARI_Val_Rank, 
+                     NMI_Val_Rank, 
+                     Sil_Val_Rank, 
                      Rank)
 metric_table <- gridExtra::tableGrob(metric_res,
-                                     cols = c("Method", "ARI", "ARI Rank", "NMI", "NMI Rank", "Silhouette", "Silhouette Rank", "Overall Rank"), 
+                                     cols = c("Method", "ARI (Rank)", "NMI (Rank)", "Mean Silhouette (Rank)", "Overall Rank"), 
                                      theme = gridExtra::ttheme_minimal(colhead = list(bg_params = list(fill = "grey90"))), 
                                      rows = NULL)
 ```
 
-Looking at the results, we see that `{SCISSORS}` almost exactly recaptures the original clustering, and also provides the best measure of cluster fit (silhouette score). Even methods that know the true number of cluster *a priori*, $k$-means and hierarchical clustering, ignore the two small subclusters in favor of splitting up larger clusters. 
+Looking at the results, we see that `{SCISSORS}` almost exactly recaptures the original clustering, and also provides the best measure of cluster fit (silhouette score). Even methods that know the true number of cluster *a priori*, $k$-means and hierarchical clustering, ignore the two small subclusters in favor of splitting up larger clusters. The two other rare cell-focused methods, GiniClust3 & CellSIUS, fail to split the two smallest clusters into their true identities. 
 
-```{r, fig.width=14, fig.height=10}
-p10a <- (p9 / (((p8 + facet_wrap(~"Ground Truth")) | metric_table))) + 
-       plot_layout(heights = c(2, 1)) 
+```{r, fig.width=16, fig.height=10}
+p10a <- (p9 / (((p8 + facet_wrap(~"Ground Truth")) | metric_table) + plot_layout(widths = c(1, 2.75)))) + 
+        plot_layout(heights = c(2.5, 1)) 
 p10a
 ```
 
@@ -793,10 +853,10 @@ Louvain_res_incr <- purrr::map(c(.5, .7, .9, 1.1, 1.5, 2), function(x) {
                                       random.seed = 312, 
                                       verbose = FALSE)
   cluster_vals <- as.integer(cluster_res$seurat_clusters) - 1L
-  ari_val <- mclust::adjustedRandIndex(cluster_res$seurat_clusters, sim_panc_ncell1000_nclust7$cellPopulation)
-  nmi_val <- aricode::NMI(cluster_res$seurat_clusters, sim_panc_ncell1000_nclust7$cellPopulation)
+  ari_val <- mclust::adjustedRandIndex(cluster_vals, sim_panc_ncell1000_nclust7$cellPopulation)
+  nmi_val <- aricode::NMI(cluster_vals, sim_panc_ncell1000_nclust7$cellPopulation)
   sil_val <- mean(cluster::silhouette(SCISSORS::CosineDist(Embeddings(sim_panc_ncell1000_nclust7, "pca")[, 1:20]), 
-                                      x = as.integer(cluster_res$seurat_clusters) - 1L)[, 3])
+                                      x = cluster_vals)[, 3])
   return(list(Clustering = cluster_vals, 
               ARI = ari_val, 
               NMI = nmi_val, 
@@ -816,113 +876,120 @@ louvain_metric_res <- data.frame(Res = factor(c(.5, .7, .9, 1.1, 1.5, 2.0),
                       arrange(desc(ARI)) %>% 
                       mutate(across(where(is.numeric), \(x) round(x, 3)))
 louvain_ari_table <- gridExtra::tableGrob(louvain_metric_res,
-                                          cols = c("Resolution", "Adj. Rand Index", "Norm. M.I.", "Sil."), 
+                                          cols = c("Resolution", "ARI", "NMI", "Mean Silhouette"), 
                                           theme = gridExtra::ttheme_minimal(colhead = list(bg_params = list(fill = "grey90"))), 
                                           rows = NULL)
 ```
 
 We see that the Louvain algorithm tends to split off larger clusters first before identifying the true split between the two smaller clusters (true clusters 5 & 6). 
 
-```{r, fig.width=12, fig.height=10}
+```{r, fig.width=11, fig.height=9}
 p10b <- ggplot(res_df, aes(x = tSNE_1, y = tSNE_2, color = clust)) + 
         facet_wrap(~paste0("Resolution: ", resolution), 
-                   ncol = 2) + 
+                   ncol = 3) + 
         geom_point(size = 0.75, alpha = 0.75) + 
         scale_color_paletteer_d("ggsci::category10_d3") + 
         labs(x = "t-SNE 1", 
              y = "t-SNE 2",  
              color = "Louvain\nCluster") + 
-        theme_classic(base_size = 14) + 
+        theme_classic(base_size = 16) + 
         theme(axis.ticks = element_blank(), 
               axis.text = element_blank(), 
               plot.title = element_blank(), 
               legend.title = element_text(face = "bold")) + 
         guides(color = guide_legend(override.aes = list(size = 3, alpha = 1)))
-(p10b / (p8 | louvain_ari_table)) + plot_layout(heights = c(2, 1))      
+p10c <- (p10b / ((p8 | louvain_ari_table) + plot_layout(widths = c(1.2, 2)))) + plot_layout(heights = c(2.25, 1))
+p10c
 ```
 
 ## Computational Cost 
 
 Next, let's take a look at how the runtimes of the various methods compare. `{SCISSORS}` has the highest runtime, as expected because it performs multiple runs of the Louvain algorithm, as opposed to most of the simpler methods which are single-pass. 
 
-```{r, fig.width=10}
+```{r, fig.width=10, fig.height=4}
 p11a <- sim_results %>% 
-       mutate(dataset_size = stringr::str_extract(dataset, "ncell.*_"), 
-              dataset_size = stringr::str_replace(stringr::str_replace(dataset_size, "ncell", ""), "_", ""), 
-              dataset_size = as.integer(dataset_size), 
-              dataset_size = factor(dataset_size, levels = c("1000", "3000", "5000", "10000"))) %>% 
-       ggplot(aes(x = method, y = runtime_minutes, fill = method)) + 
-       facet_wrap(~method, scales = "free_x") + 
-       geom_violin(draw_quantiles = 0.5, 
-                   scale = "width", 
-                   size = 1, 
-                   color = "black") + 
-       scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = .1)) + 
-       scale_fill_paletteer_d("ggsci::nrc_npg") + 
-       labs(y = "log(Runtime)", fill = "Clustering Method") + 
-       theme_classic(base_size = 14) + 
-       theme(axis.ticks.x = element_blank(), 
-             panel.grid.major.y = element_line(), 
-             axis.title.x = element_blank())
+        mutate(dataset_size = stringr::str_extract(dataset, "ncell.*_"), 
+               dataset_size = stringr::str_replace(stringr::str_replace(dataset_size, "ncell", ""), "_", ""), 
+               dataset_size = as.integer(dataset_size), 
+               dataset_size = factor(dataset_size, levels = c("1000", "3000", "5000", "10000"))) %>% 
+        ggplot(aes(x = method, y = runtime_minutes, fill = method)) + 
+        facet_wrap(~method, scales = "free", ncol = 4) + 
+        geom_violin(draw_quantiles = 0.5, 
+                    scale = "width", 
+                    size = 1, 
+                    color = "black") + 
+        scale_y_continuous(trans = "log", labels = scales::label_number(accuracy = .01)) + 
+        scale_fill_paletteer_d("ggsci::nrc_npg") + 
+        labs(y = "log(Runtime)", fill = "Clustering Method") + 
+        theme_classic(base_size = 16) + 
+        theme(axis.ticks.x = element_blank(), 
+              panel.grid.major.y = element_line(color = "grey80"), 
+              axis.title.x = element_blank(), 
+              legend.position = "none", 
+              axis.text.x = element_blank())
 p11a
 ```
 
-We'll also plot un-transformed runtime, though the plot is harder to read because of the disparity in runtimes between simpler and more complex methods. It's expected that `{SCISSORS}` have longer runtimes as it's a multi-pass algorithm, but even for larger datasets it rarely exceeds 10 minutes of runtime thanks to its internal automatic identification of reclustering targets, which greatly cuts down on the amount of reclustering passes performed. 
+We'll also plot un-transformed runtime, though the plot is harder to read because of the disparity in runtimes between simpler and more complex methods. It's expected that `{SCISSORS}` have longer runtimes as it's a multi-pass algorithm, but even for larger datasets it rarely exceeds 10 minutes of runtime thanks to its internal automatic identification of reclustering targets, which greatly cuts down on the amount of reclustering passes performed. This is also lower than the CellSIUS runtime, which was the highest of all the algorithms we tested. 
 
-```{r, fig.width=12}
+```{r, fig.width=12, fig.height=6}
 p11b <- sim_results %>% 
-       mutate(dataset_size = stringr::str_extract(dataset, "ncell.*_"), 
-              dataset_size = stringr::str_replace(stringr::str_replace(dataset_size, "ncell", ""), "_", ""), 
-              dataset_size = as.integer(dataset_size), 
-              dataset_size = factor(dataset_size, 
-                                    levels = c(1000L, 3000L, 5000L, 10000L), 
-                                    labels = c("1,000", "3,000", "5,000", "10,000"))) %>% 
-       ggplot(aes(x = dataset_size, y = runtime_minutes, fill = method, group = dataset_size)) + 
-       facet_wrap(~method, scales = "free") + 
-       geom_violin(draw_quantiles = 0.5, 
-                   position = position_dodge(1), 
-                   scale = "width", 
-                   size = 1, 
-                   color = "black") + 
-       scale_y_continuous(labels = scales::label_number(accuracy = .01)) + 
-       scale_fill_paletteer_d("ggsci::nrc_npg") + 
-       labs(x = "Number of Cells", 
-            y = "Runtime (minutes)", 
-            fill = "Clustering Method") + 
-       theme_classic(base_size = 14) + 
-       theme(axis.ticks.x = element_blank(), 
-             panel.grid.major.y = element_line())
+        mutate(dataset_size = stringr::str_extract(dataset, "ncell.*_"), 
+               dataset_size = stringr::str_replace(stringr::str_replace(dataset_size, "ncell", ""), "_", ""), 
+               dataset_size = as.integer(dataset_size), 
+               dataset_size = factor(dataset_size, 
+                                     levels = c(1000L, 3000L, 5000L, 10000L), 
+                                     labels = c("1,000", "3,000", "5,000", "10,000"))) %>% 
+        ggplot(aes(x = dataset_size, y = runtime_minutes, fill = method, group = dataset_size)) + 
+        facet_wrap(~method, scales = "free_y", ncol = 4) + 
+        geom_violin(draw_quantiles = 0.5, 
+                    position = position_dodge(1), 
+                    scale = "width", 
+                    size = 1, 
+                    color = "black") + 
+        scale_y_continuous(labels = scales::label_number(accuracy = .01)) + 
+        scale_fill_paletteer_d("ggsci::nrc_npg") + 
+        labs(x = "Number of Cells", 
+             y = "Runtime (minutes)", 
+             fill = "Clustering Method") + 
+        theme_classic(base_size = 16) + 
+        theme(axis.text.x = element_text(angle = 45, hjust = 0.9, vjust = 0.95), 
+              panel.grid.major.y = element_line(color = "grey80"), 
+              legend.position = "none")
 p11b
 ```
 
 Lastly, we'll make a table of the median runtime per-method, per-dataset size. 
 
 ```{r}
-sim_results %>% 
-  mutate(dataset_size = stringr::str_extract(dataset, "ncell.*_"), 
-         dataset_size = stringr::str_replace(stringr::str_replace(dataset_size, "ncell", ""), "_", ""), 
-         dataset_size = as.integer(dataset_size), 
-         dataset_size = factor(dataset_size, 
-                               levels = c(1000L, 3000L, 5000L, 10000L), 
-                               labels = c("1,000", "3,000", "5,000", "10,000"))) %>% 
-  with_groups(c(method, dataset_size), 
-              summarise, 
-              med = median(runtime_minutes)) %>% 
-  arrange(dataset_size, med) %>% 
-  kableExtra::kbl(digits = 3, 
-                  booktabs = TRUE, 
-                  col.names = c("Method", "N Cells", "Median Runtime")) %>% 
+runtime_table <- mutate(sim_results, 
+                        dataset_size = stringr::str_extract(dataset, "ncell.*_"), 
+                        dataset_size = stringr::str_replace(stringr::str_replace(dataset_size, "ncell", ""), "_", ""), 
+                        dataset_size = as.integer(dataset_size), 
+                        dataset_size = factor(dataset_size, 
+                                              levels = c(1000L, 3000L, 5000L, 10000L), 
+                                              labels = c("1,000", "3,000", "5,000", "10,000"))) %>% 
+                 with_groups(c(method, dataset_size), 
+                             summarise, 
+                             med = median(runtime_minutes)) %>% 
+                 arrange(dataset_size, med)
+kableExtra::kbl(runtime_table, 
+                digits = 3, 
+                booktabs = TRUE, 
+                col.names = c("Method", "N Cells", "Median Runtime")) %>% 
   kableExtra::kable_classic(full_width = FALSE, "hover")
 ```
 
-# Save Figures
+# Save Results 
+
+## Figures
 
 First we'll define a convenience function to help save our plots. 
 
 ```{r}
 fig_save <- function(plot.obj, plot.name = "", dims = c(9, 5)) {
   ggplot2::ggsave(filename = plot.name, 
-                  path = "./Figures", 
+                  path = "../Figures", 
                   plot = plot.obj, 
                   device = "pdf", 
                   width = dims[1], 
@@ -936,27 +1003,39 @@ Now let's save them all as PDFs.
 
 ```{r}
 # all metric observations
-fig_save(p0a, plot.name = "Total_ARI_By_Method_And_Reference.pdf", dims = c(10, 6))
-fig_save(p0b, plot.name = "Total_ARI_By_Method.pdf", dims = c(10, 6))
-fig_save(p1a, plot.name = "Total_NMI_By_Method_And_Reference.pdf", dims = c(10, 6))
-fig_save(p1b, plot.name = "Total_NMI_By_Method.pdf", dims = c(10, 6))
-fig_save(p2a, plot.name = "Total_DB_Index_By_Method_And_Reference.pdf", dims = c(10, 6))
-fig_save(p2b, plot.name = "Total_DB_Index_By_Method.pdf", dims = c(10, 6))
-fig_save(p3a, plot.name = "Total_Silhouette_By_Method_And_Reference.pdf", dims = c(10, 6))
-fig_save(p3b, plot.name = "Total_Silhouette_By_Method.pdf", dims = c(10, 6))
+fig_save(p0a, plot.name = "Total_ARI_By_Method_And_Reference.pdf", dims = c(12, 6))
+fig_save(p0b, plot.name = "Total_ARI_By_Method.pdf", dims = c(8, 5))
+fig_save(p1a, plot.name = "Total_NMI_By_Method_And_Reference.pdf", dims = c(12, 6))
+fig_save(p1b, plot.name = "Total_NMI_By_Method.pdf", dims = c(8, 5))
+fig_save(p2a, plot.name = "Total_DB_Index_By_Method_And_Reference.pdf", dims = c(12, 6))
+fig_save(p2b, plot.name = "Total_DB_Index_By_Method.pdf", dims = c(8, 5))
+fig_save(p3a, plot.name = "Total_Silhouette_By_Method_And_Reference.pdf", dims = c(12, 6))
+fig_save(p3b, plot.name = "Total_Silhouette_By_Method.pdf", dims = c(8, 5))
 # top 50% of metric observations
-fig_save(p4, plot.name = "Above_Median_ARI_By_Method_And_Reference.pdf", dims = c(10, 6))
-fig_save(p5, plot.name = "Above_Median_NMI_By_Method_And_Reference.pdf", dims = c(10, 6))
-fig_save(p6, plot.name = "Above_Median_DB_Index_By_Method_And_Reference.pdf", dims = c(10, 6))
-fig_save(p7, plot.name = "Above_Median_Silhouette_By_Method_And_Reference.pdf", dims = c(10, 6))
+fig_save(p4, plot.name = "Above_Median_ARI_By_Method_And_Reference.pdf", dims = c(12, 6))
+fig_save(p5, plot.name = "Above_Median_NMI_By_Method_And_Reference.pdf", dims = c(12, 6))
+fig_save(p6, plot.name = "Above_Median_DB_Index_By_Method_And_Reference.pdf", dims = c(12, 6))
+fig_save(p7, plot.name = "Above_Median_Silhouette_By_Method_And_Reference.pdf", dims = c(12, 6))
 # clustering case study
-fig_save(p8, plot.name = "Case_Study_True_Label_tSNE.pdf", dims = c(8, 4.5))
-fig_save(p9, plot.name = "Case_Study_Estimated_Clusters_All_tSNE.pdf", dims = c(12, 7))
-fig_save(p10a, plot.name = "Case_Study_Estimated_Clusters_Performance.pdf", dims = c(15, 8))
-fig_save(p10b, plot.name = "Case_Study_Louvain_Resolution_Performance.pdf", dims = c(15, 8))
+fig_save(p8, plot.name = "Case_Study_True_Label_tSNE.pdf", dims = c(6.2, 5))
+fig_save(p9, plot.name = "Case_Study_Estimated_Clusters_All_tSNE.pdf", dims = c(12, 5.75))
+fig_save(p10a, plot.name = "Case_Study_Estimated_Clusters_Performance.pdf", dims = c(16, 10))
+fig_save(p10b, plot.name = "Case_Study_Louvain_Resolution_Performance.pdf", dims = c(11, 6))
+fig_save(p10c, plot.name = "Case_Study_Louvain_Resolution_Performance_with_Table.pdf", dims = c(11, 9))
 # runtime 
-fig_save(p11a, plot.name = "Runtime_Log_By_Method_And_Reference.pdf", dims = c(12, 7))
-fig_save(p11b, plot.name = "Runtime_Raw_By_Method_And_Number_Cells.pdf", dims = c(12, 7))
+fig_save(p11a, plot.name = "Runtime_Log_By_Method_And_Reference.pdf", dims = c(10, 4))
+fig_save(p11b, plot.name = "Runtime_Raw_By_Method_And_Number_Cells.pdf", dims = c(12, 6))
+```
+
+## Data 
+
+```{r}
+openxlsx::write.xlsx(param_table, 
+                     file = "../Data/simulation_method_parameter_values.xlsx", 
+                     overwrite = TRUE)
+openxlsx::write.xlsx(runtime_table, 
+                     file = "../Data/simulation_method_runtime_values.xlsx", 
+                     overwrite = TRUE)
 ```
 
 # Session Info
