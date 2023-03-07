@@ -162,7 +162,7 @@ evaluate_Seurat_Louvain <- function(seu.obj = NULL,
                         variant = "sqrt")
     sil <- mean(cluster::silhouette(dist = SCISSORS::CosineDist(Seurat::Embeddings(seu.obj, "pca")[, 1:30]), x = as.integer(seu_obj_reclust$seurat_clusters))[, 3])
     DB_index <- clusterSim::index.DB(x = Seurat::Embeddings(seu.obj, "pca")[, 1:30], 
-                                     cl = as.integer(seu.obj$seurat_clusters))$DB
+                                     cl = as.integer(seu_obj_reclust$seurat_clusters))$DB
     return(list(ARI = ARI, 
                 NMI = NMI, 
                 sil = sil, 
@@ -209,7 +209,7 @@ evaluate_Seurat_Leiden <- function(seu.obj = NULL,
                         variant = "sqrt")
     sil <- mean(cluster::silhouette(dist = SCISSORS::CosineDist(Seurat::Embeddings(seu.obj, "pca")[, 1:30]), x = as.integer(seu_obj_reclust$seurat_clusters))[, 3])
     DB_index <- clusterSim::index.DB(x = Seurat::Embeddings(seu.obj, "pca")[, 1:30], 
-                                     cl = as.integer(seu.obj$seurat_clusters))$DB
+                                     cl = as.integer(seu_obj_reclust$seurat_clusters))$DB
     return(list(ARI = ARI, 
                 NMI = NMI, 
                 sil = sil, 
@@ -251,7 +251,7 @@ evaluate_hclust <- function(seu.obj = NULL,
                         variant = "sqrt")
     sil <- mean(cluster::silhouette(dist = SCISSORS::CosineDist(Seurat::Embeddings(seu.obj, "pca")[, 1:30]), x = hclust_res)[, 3])
     DB_index <- clusterSim::index.DB(x = Seurat::Embeddings(seu.obj, "pca")[, 1:30], 
-                                     cl = as.integer(seu.obj$seurat_clusters))$DB
+                                     cl = hclust_res)$DB
     return(list(ARI = ARI, 
                 NMI = NMI, 
                 sil = sil, 
@@ -295,7 +295,7 @@ evaluate_kmeans <- function(seu.obj = NULL,
                         variant = "sqrt")
     sil <- mean(cluster::silhouette(dist = SCISSORS::CosineDist(Seurat::Embeddings(seu.obj, "pca")[, 1:30]), x = clust_res$cluster)[, 3])
     DB_index <- clusterSim::index.DB(x = Seurat::Embeddings(seu.obj, "pca")[, 1:30], 
-                                     cl = as.integer(seu.obj$seurat_clusters))$DB
+                                     cl = clust_res$cluster)$DB
     return(list(ARI = ARI, 
                 NMI = NMI, 
                 sil = sil, 
@@ -353,7 +353,7 @@ evaluate_dbscan <- function(seu.obj = NULL,
                         variant = "sqrt")
     sil <- mean(cluster::silhouette(dist = SCISSORS::CosineDist(Seurat::Embeddings(seu.obj, "pca")[, 1:30]), x = dens_clust$cluster)[, 3])
     DB_index <- clusterSim::index.DB(x = Seurat::Embeddings(seu.obj, "pca")[, 1:30], 
-                                     cl = as.integer(seu.obj$seurat_clusters))$DB
+                                     cl = dens_clust$cluster)$DB
     return(list(ARI = ARI, 
                 NMI = NMI, 
                 sil = sil, 
@@ -396,7 +396,7 @@ evaluate_giniclust <- function(seu.obj = NULL,
                         variant = "sqrt")
     sil <- mean(cluster::silhouette(dist = SCISSORS::CosineDist(Seurat::Embeddings(seu.obj, "pca")[, 1:30]), x = as.integer(gc3_clust$finalCluster))[, 3])
     DB_index <- clusterSim::index.DB(x = Seurat::Embeddings(seu.obj, "pca")[, 1:30], 
-                                     cl = as.integer(seu.obj$seurat_clusters))$DB
+                                     cl = gc3_clust$finalCluster)$DB
     return(list(ARI = ARI, 
                 NMI = NMI, 
                 sil = sil, 
